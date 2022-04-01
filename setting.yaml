@@ -1,0 +1,181 @@
+# Copyright 2022 Google LLC
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+data_to_replicate:
+{% if sql_flavour.upper() == 'S4' %}
+  - base_table: acdoca
+    load_frequency: "@hourly"
+  - base_table: finsc_ld_cmp
+    load_frequency: "@daily"
+  - base_table: finsc_ledger_rep
+    load_frequency: "@daily"
+  - base_table: matdoc
+    load_frequency: "@hourly"
+  - base_table: prcd_elements
+    load_frequency: "@hourly"
+{% endif %}
+{% if sql_flavour.upper() == 'ECC' %}
+  - base_table: anla
+    load_frequency: "@hourly"
+  - base_table: ankt
+    load_frequency: "@hourly"    
+  - base_table: faglflexa
+    load_frequency: "@hourly"
+  - base_table: konv
+    load_frequency: "@daily"
+  - base_table: prps
+    load_frequency: "@hourly"     
+  - base_table: vbuk
+    load_frequency: "@hourly"
+  - base_table: vbup
+    load_frequency: "@hourly"
+{% endif %}
+  - base_table: adr6
+    load_frequency: "@daily"
+  - base_table: adrc
+    load_frequency: "@daily"
+  - base_table: adrct
+    load_frequency: "@daily"    
+  - base_table: bkpf
+    load_frequency: "@hourly"
+  - base_table: bseg
+    load_frequency: "@hourly"
+  - base_table: but000
+    load_frequency: "@daily"
+  - base_table: but020
+    load_frequency: "@daily"
+  - base_table: cepc
+    load_frequency: "@daily"
+  - base_table: cepct
+    load_frequency: "@daily"
+  - base_table: csks
+    load_frequency: "@daily"
+  - base_table: cskt
+    load_frequency: "@daily"
+  - base_table: ekbe
+    load_frequency: "@hourly"
+  - base_table: ekes
+    load_frequency: "@hourly"
+  - base_table: eket
+    load_frequency: "@hourly"
+  - base_table: ekkn
+    load_frequency: "@hourly"
+  - base_table: ekko
+    load_frequency: "@hourly"
+  - base_table: ekpo
+    load_frequency: "@hourly"
+  - base_table: kna1
+    load_frequency: "@daily"
+  - base_table: lfa1
+    load_frequency: "@daily"
+  - base_table: likp
+    load_frequency: "@hourly"
+  - base_table: lips
+    load_frequency: "@hourly"
+  - base_table: makt
+    load_frequency: "@daily"
+  - base_table: mara
+    load_frequency: "@daily"
+  - base_table: mard
+    load_frequency: "@hourly"
+  - base_table: rbco
+    load_frequency: "@hourly"
+  - base_table: rbkp
+    load_frequency: "@hourly"
+  - base_table: rseg
+    load_frequency: "@hourly"
+  - base_table: setleaf
+    load_frequency: "@monthly"
+  - base_table: setnode
+    load_frequency: "@monthly"
+  - base_table: setheadert
+    load_frequency: "@monthly"
+  - base_table: ska1
+    load_frequency: "@daily"
+  - base_table: skat
+    load_frequency: "@daily"
+  - base_table: t001
+    load_frequency: "@once"
+  - base_table: t001w
+    load_frequency: "@once"
+  - base_table: t002
+    load_frequency: "@once"
+  - base_table: t005
+    load_frequency: "@yearly"
+  - base_table: t005k
+    load_frequency: "@yearly"
+  - base_table: t005s
+    load_frequency: "@yearly"
+  - base_table: t005t
+    load_frequency: "@yearly"
+  - base_table: t006
+    load_frequency: "@yearly"
+  - base_table: t006a
+    load_frequency: "@once"
+  - base_table: t006t
+    load_frequency: "@once"
+  - base_table: t009
+    load_frequency: "@once"
+  - base_table: t009b
+    load_frequency: "@once"
+  - base_table: t023
+    load_frequency: "@once"
+  - base_table: t023t
+    load_frequency: "@once"
+  - base_table: t134
+    load_frequency: "@once"
+  - base_table: t134t
+    load_frequency: "@once"
+  - base_table: t179
+    load_frequency: "@once"
+  - base_table: t179t
+    load_frequency: "@once"
+  - base_table: t881
+    load_frequency: "@once"
+  - base_table: t881t
+    load_frequency: "@once"
+  - base_table: tcurc
+    load_frequency: "@once"
+  - base_table: tcurf
+    load_frequency: "@once"
+  - base_table: tcurr
+    load_frequency: "@daily"
+  - base_table: tcurt
+    load_frequency: "@daily"
+  - base_table: tcurx
+    load_frequency: "@daily"
+  - base_table: tka02
+    load_frequency: "@yearly"
+  - base_table: tvko
+    load_frequency: "@yearly"
+  - base_table: tvkot
+    load_frequency: "@yearly"
+  - base_table: tvtw
+    load_frequency: "@yearly"
+  - base_table: tvtwt
+    load_frequency: "@yearly"
+  - base_table: vbak
+    load_frequency: "RUNTIME"
+  - base_table: vbap
+    load_frequency: "RUNTIME"
+  - base_table: vbep
+    load_frequency: "RUNTIME"
+  - base_table: vbfa
+    load_frequency: "RUNTIME"
+  - base_table: vbpa
+    load_frequency: "RUNTIME"
+  - base_table: vbrk
+    load_frequency: "RUNTIME"
+  - base_table: vbrp
+    load_frequency: "RUNTIME"

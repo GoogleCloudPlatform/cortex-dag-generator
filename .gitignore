@@ -1,0 +1,7 @@
+__pycache__
+env
+venv
+.vscode
+.coverage
+cov.xml
+coverage.xml
