@@ -67,7 +67,7 @@ def generate_runtime_sql(cdc_base_table, cdc_target_view, keys,
     keys_comparator_with_t1_s1 = " and ".join(
         get_key_comparator(['T1', 'S1'], keys))
     keys_comparator_with_t1s1_d1 = " and ".join(
-        get_comparator_with_select('D1', keys))
+        get_key_comparator(['D1', 'T1S1'], keys))
     sql_template_file = open(
         os.path.dirname(os.path.abspath(__file__)) +
         "/template_sql/runtime_query_view.sql", "r")
@@ -220,7 +220,7 @@ def create_view(target_table_name, sql):
 
 
 def get_keys(dataset, source_table):
-    query = "SELECT  fieldname FROM {dataset}.dd03l where KEYFLAG = 'X' and tabname = \"{source_table}\"".format(
+    query = "SELECT  fieldname FROM {dataset}.dd03l where KEYFLAG = 'X' AND fieldname != '.INCLUDE' and tabname = \"{source_table}\"".format(
         dataset=dataset, source_table=source_table.upper())
     query_job = client.query(query)
     fields = []

@@ -64,7 +64,7 @@ with open('../setting.yaml') as tmp:
     t = jinja2.Template(tmp.read(), trim_blocks=True, lstrip_blocks=True)
     f = t.render({'sql_flavour': sql_flavour})
 
-    tables_to_replicate = yaml.load(f, Loader=yaml.FullLoader)
+    tables_to_replicate = yaml.load(f, Loader=yaml.SafeLoader)
 
     for table in tables_to_replicate['data_to_replicate']:
         logging.info(f"== Processing table {table['base_table']} ==")

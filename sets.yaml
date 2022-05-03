@@ -13,27 +13,27 @@
 # limitations under the License.
 
 sets_data:
-#Cost Centers:
+#Cost Centers: 
 # table: csks, select_fields (cost center): 'kostl', where clause: Controling Area (kokrs), Valid to (datbi)
 #- setname: 'H1' 
-- setname: '0001' 
+- setname: 'H1010' 
   setclass: '0101'
   orgunit: '1000'
-  mandt:  '050'
+  mandt:  '800'
   table: 'csks'
   key_field: 'kostl'
-  where_clause: [ kokrs = '0001', datbi >= cast('9999-12-31' as date)]
+  where_clause: [ kokrs = '1000', datbi >= cast('9999-12-31' as date)]
   load_frequency: "@daily"
-#Profit Centers:
+#Profit Centers: 
 # setclass: 0106, table: cepc, select_fields (profit center): 'cepc', where clause: Controling Area (kokrs), Valid to (datbi)
 #- setname: 'HE' 
-- setname: 'P0001' 
+- setname: 'H_TECH15' 
   setclass: '0106'
   orgunit: '1000'
-  mandt:  '050'
+  mandt:  '800'
   table: 'cepc'
   key_field: 'prctr'
-  where_clause: [ kokrs = '0001', datbi >= cast('9999-12-31' as date) ]
+  where_clause: [ kokrs = '1000', datbi >= cast('9999-12-31' as date) ]  
   load_frequency: "@monthly"
 
 #G/L Accounts:

@@ -57,7 +57,7 @@ client = bigquery.Client()
 
 # Process hierarchies
 with open('../sets.yaml') as f:
-    datasets =  yaml.load(f, Loader=yaml.FullLoader)
+    datasets =  yaml.load(f, Loader=yaml.SafeLoader)
 
     for set in datasets['sets_data']:
         logging.info(f"== Processing set {set['setname']} ==")
