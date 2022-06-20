@@ -17,6 +17,7 @@ The ```cloudbuild.cdc.yaml``` for this generator requires the following paramete
 - ```_TEST_DATA```: If set to true, the test records in the generated test tables will be copied from the raw landing dataset into the CDC tables
 - ```_SQL_FLAVOUR```: 'S4' or 'ECC'. Default: S4
 - ```_GCS_LOG_BUCKET```: GCS bucket created for logs that this generator writes to
+- ```_GEN_EXT```: Generate external DAGs. Requires configuration of external sources unless using _TEST_DATA=true (see README instructions in the [data foundation](https://github.com/GoogleCloudPlatform/cortex-data-foundation)).
 
 
 # Run Options

@@ -23,7 +23,7 @@ def generate_hier(**kwargs):
     src_dataset = kwargs["src_dataset"]
     mandt = kwargs["mandt"]
     setname = kwargs["setname"]
-    setclass =  kwargs["setclass"]
+    setclass = kwargs["setclass"]
     orgunit = kwargs["orgunit"]
     table = kwargs["table"]
     select_key = kwargs["select_key"]
@@ -31,9 +31,9 @@ def generate_hier(**kwargs):
     full_table = kwargs["full_table"]
 
     nodes = []
-    nodes = get_nodes(src_dataset, mandt, setname,
-                       setclass, orgunit, table,
-                       select_key, where_clause, full_table)
+    nodes = get_nodes(src_dataset, mandt, setname, 
+                        setclass, orgunit, table,
+                        select_key, where_clause, full_table)
 
     if not nodes:
         print("Dataset {setname}  not found in SETNODES".format(setname=setname))
@@ -57,31 +57,34 @@ def insert_rows(full_table, nodes):
     else:
         print("Encountered errors while inserting rows: {}".format(errors))
 
-def get_nodes(src_dataset, mandt, setname, setclass, org_unit,
+def get_nodes(src_dataset, mandt, setname, setclass, org_unit, 
               table, select_key, where_clause, full_table):
     sets_tables = []
     query = """SELECT  setname, setclass, subclass, lineid, subsetcls, subsetscls, subsetname
-             FROM  {src_dataset}.setnode
-             WHERE setname = \'{setname}\' and setclass = \'{setclass}\'
-             and subclass = \'{org_unit}\' and mandt = \'{mandt}\' """.format(
-        src_dataset=src_dataset,
-        setname=setname,
-        mandt=mandt,
-        setclass=setclass,
-        org_unit=org_unit)
+             FROM  `{src_dataset}.setnode`
+             WHERE setname = \'{setname}\' 
+              AND setclass = \'{setclass}\'
+              AND subclass = \'{org_unit}\' 
+              AND mandt = \'{mandt}\' """.format(src_dataset=src_dataset,
+                                                 setname=setname,
+                                                 mandt=mandt,
+                                                 setclass=setclass,
+                                                 org_unit=org_unit)
 
     query_job = client.query(query)
     for setr in query_job:
         sets_tables = []
-        nodes = get_leafs_children(src_dataset, mandt, setr,
-                                   table, select_key, where_clause, full_table)
+        nodes = get_leafs_children(src_dataset, mandt, setr, table, select_key,
+                                   where_clause, full_table)
         print(nodes)
         sets_tables.append(nodes)
         insert_rows(full_table, sets_tables)
 
     return sets_tables
 
-def get_leafs_children(src_dataset, mandt, row, table, field, where_clause, full_table):
+
+def get_leafs_children(src_dataset, mandt, row, table, field, where_clause,
+                       full_table):
     node_dict = dict()
     # TODO: would be nice to implement multithreaded calls
 
@@ -94,24 +97,24 @@ def get_leafs_children(src_dataset, mandt, row, table, field, where_clause, full
     }
 
     # Get values from setleaf (only lower child sets have these)
-    query = """SELECT  valsign, valoption, valfrom, valto
-            FROM  {src_dataset}.setleaf
+    query = """SELECT valsign, valoption, valfrom, valto
+            FROM `{src_dataset}.setleaf`
             WHERE setname = \'{setname}\'
-            and setclass = \'{setclass}\'
-            and subclass = \'{subclass}\'
-            and mandt = \'{mandt}\' """.format(src_dataset=src_dataset,
-                                               setname=row['subsetname'],
-                                               mandt=mandt,
-                                               setclass=row['subsetcls'],
-                                               subclass=row['subsetscls'])
+              AND setclass = \'{setclass}\'
+              AND subclass = \'{subclass}\'
+              AND mandt = \'{mandt}\' """.format(src_dataset=src_dataset,
+                                                 setname=row['subsetname'],
+                                                 mandt=mandt,
+                                                 setclass=row['subsetcls'],
+                                                 subclass=row['subsetscls'])
 
     leafs = client.query(query)
 
     # Get values from actual master data tables (e.g., Costs center, GL Accounts, etc)
 
     for setl in leafs:
-    # Field = the key (e.g., profit center: CEPC-PRCTC)
-    # Where clause parses additional filters: MANDT, Controlling Area, valid-to date
+        # Field = the key (e.g., profit center: CEPC-PRCTC)
+        # Where clause parses additional filters: MANDT, Controlling Area, valid-to date
         if setl['valoption'] == 'EQ':
             where_cls = " {field}  = \'{valfrom}\' ".format(
                 field=field, valfrom=setl['valfrom'])
@@ -119,16 +122,16 @@ def get_leafs_children(src_dataset, mandt, row, table, field, where_clause, full
             where_cls = " {field} between \'{valfrom}\' and  \'{valto}\' ".format(
                 field=field, valfrom=setl['valfrom'], valto=setl['valto'])
         for clause in where_clause:
-            where_cls = where_cls + " AND {clause} ".format(clause = clause)
+            where_cls = where_cls + " AND {clause} ".format(clause=clause)
 
-        query = """ SELECT {field}
-                    from {src_dataset}.{table}
-                    where mandt  = \'{mandt}\'
-                    and {where_cls}""".format(field=field,
-                                                 src_dataset=src_dataset,
-                                                 table=table,
-                                                 mandt=mandt,
-                                                 where_cls=where_cls)
+        query = """ SELECT `{field}`
+                    FROM `{src_dataset}.{table}`
+                    WHERE mandt  = \'{mandt}\'
+                      AND {where_cls}""".format(field=field,
+                                                src_dataset=src_dataset,
+                                                table=table,
+                                                mandt=mandt,
+                                                where_cls=where_cls)
 
         ranges = client.query(query)
         for line in ranges:

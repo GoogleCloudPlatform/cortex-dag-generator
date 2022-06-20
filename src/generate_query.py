@@ -27,20 +27,20 @@ storage_client = storage.Client()
 
 def table_columns(bq_table, source_project):
     bq_table_split = bq_table.split(".")
-    query = "SELECT  column_name FROM  {src_project}.{dataset}.INFORMATION_SCHEMA.COLUMNS WHERE table_name=\"{table_name}\"".format(
+    query = "SELECT `column_name` FROM `{src_project}.{dataset}.INFORMATION_SCHEMA.COLUMNS` WHERE table_name = \"{table_name}\"".format(
         dataset=bq_table_split[1],
         table_name=bq_table_split[2],
         src_project=source_project)
     query_job = client.query(query)  # Make an API request.
-    seperator = ","
+    seperator = ", "
     update_fields = []
     columns_to_exclude = ['_PARTITIONTIME', 'operation_flag', 'is_deleted']
     fields = []
     for row in query_job:
         column = row["column_name"]
         if column not in columns_to_exclude:
-            fields.append(column)
-            update_fields.append(f"T.{column}=S.{column}")
+            fields.append(f"`{column}`")
+            update_fields.append(f"T.`{column}` = S.`{column}`")
     return seperator.join(fields), seperator.join(update_fields)
 
 
@@ -56,17 +56,20 @@ def generate_dag(cdc_base_table, template, **subs):
     generated_dag_file.close()
 
 
-def generate_runtime_sql(cdc_base_table, cdc_target_view, keys,
-                         source_project):
+def generate_runtime_sql(cdc_base_table, cdc_target_view, keys, source_project):
     fields, update_fields = table_columns(cdc_base_table, source_project)
     if not fields:
         print(f"Schema could not be retrieved for {cdc_base_table}")
     keys_with_dt1_prefix = ",".join(add_prefix_to_keys('DT1', keys))
-    keys_comparator_with_dt1_t1 = " and ".join(
+    keys_comparator_with_dt1_t1 = " AND ".join(
         get_key_comparator(['DT1', 'T1'], keys))
-    keys_comparator_with_t1_s1 = " and ".join(
+    keys_comparator_with_t1_s1 = " AND ".join(
         get_key_comparator(['T1', 'S1'], keys))
+<<<<<<< HEAD
+    keys_comparator_with_t1s1_d1 = " AND ".join(
+=======
     keys_comparator_with_t1s1_d1 = " and ".join(
+>>>>>>> gob-main
         get_key_comparator(['D1', 'T1S1'], keys))
     sql_template_file = open(
         os.path.dirname(os.path.abspath(__file__)) +
@@ -74,7 +77,7 @@ def generate_runtime_sql(cdc_base_table, cdc_target_view, keys,
     sql_template = Template(sql_template_file.read())
     generated_sql_template = sql_template.substitute(
         base_table=cdc_base_table,
-        keys=",".join(keys),
+        keys=", ".join(keys),
         keys_with_dt1_prefix=keys_with_dt1_prefix,
         keys_comparator_with_t1_s1=keys_comparator_with_t1_s1,
         keys_comparator_with_dt1_t1=keys_comparator_with_dt1_t1,
@@ -83,13 +86,13 @@ def generate_runtime_sql(cdc_base_table, cdc_target_view, keys,
 
 
 def generate_sql(cdc_base_table, cdc_target_table, keys, source_project, gen_test):
-    fields, update_fields = table_columns(cdc_base_table,source_project)
+    fields, update_fields = table_columns(cdc_base_table, source_project)
     if not fields:
         print(f"Schema could not be retrieved for {cdc_base_table}")
     p_key_list = get_key_comparator(['S', 'T'], keys)
     p_key_list_for_sub_query = get_key_comparator(['S1', 'T1'], keys)
-    p_key = " and ".join(p_key_list)
-    p_key_sub_query = " and ".join(p_key_list_for_sub_query)
+    p_key = " AND ".join(p_key_list)
+    p_key_sub_query = " AND ".join(p_key_list_for_sub_query)
     try:
         sql_template_file = open(
             os.path.dirname(os.path.abspath(__file__)) +
@@ -102,13 +105,13 @@ def generate_sql(cdc_base_table, cdc_target_table, keys, source_project, gen_tes
             p_key=p_key,
             fields=fields,
             update_fields=update_fields,
-            keys=",".join(keys),
+            keys=", ".join(keys),
             p_key_sub_query=p_key_sub_query)
         cdc_sql_filename = "cdc_" + cdc_base_table.replace(".", "_") + ".sql"
         cdc_sql_filepath = "generated_sql/" + cdc_sql_filename
         generated_sql_file = open(
-            Path.joinpath(Path(__file__).resolve().parents[1], cdc_sql_filepath),
-            "w")
+            Path.joinpath(
+                Path(__file__).resolve().parents[1], cdc_sql_filepath), "w")
         generated_sql_file.write(generated_sql_template)
         generated_sql_file.close()
     except:
@@ -143,29 +146,29 @@ def generate_dag_hier(cdc_base_table, frequency):
         generated_dag_file.write(generated_dag_template)
         generated_dag_file.close()
     except:
-         print(f"TECHNICAL Error accessing template or generating DAG file")
-         raise NotFound("DAG file")
+        print(f"TECHNICAL Error accessing template or generating DAG file")
+        raise NotFound("DAG file")
 
 
 def get_key_comparator(table_prefix, keys):
     p_key_list = []
     for key in keys:
-        p_key_list.append("{0}.{2}={1}.{2}".format(table_prefix[0],
-                                                   table_prefix[1], key))
+        p_key_list.append("{0}.`{2}` = {1}.`{2}`".format(
+            table_prefix[0], table_prefix[1], key))
     return p_key_list
 
 
 def get_comparator_with_select(table_name, keys):
     p_key_list = []
     for key in keys:
-        p_key_list.append(f"{key} not in (SELECT {key} from {table_name})")
+        p_key_list.append(f"`{key}` NOT IN (SELECT `{key}` FROM `{table_name}`)")
     return p_key_list
 
 
 def add_prefix_to_keys(prefix, keys):
     prefix_keys = []
     for key in keys:
-        prefix_keys.append("{0}.{1}".format(prefix, key))
+        prefix_keys.append("{0}.`{1}`".format(prefix, key))
     return prefix_keys
 
 
@@ -178,10 +181,10 @@ def check_create_target(base_table, target_table, gen_test):
         job = client.copy_table(base_table, target_table)
         job.result()
         if not gen_test:
-            sql = f"TRUNCATE TABLE {target_table}"
+            sql = f"TRUNCATE TABLE `{target_table}`"
             job = client.query(sql)
             job.result()
-        sql = f"ALTER TABLE {target_table} DROP COLUMN IF EXISTS is_deleted, DROP COLUMN IF EXISTS operation_flag"
+        sql = f"ALTER TABLE `{target_table}` DROP COLUMN IF EXISTS is_deleted, DROP COLUMN IF EXISTS operation_flag"
         job = client.query(sql)
         job.result()
         print(f"Created {target_table}")
@@ -213,14 +216,14 @@ def create_view(target_table_name, sql):
     else:
         view_id = target_table_name + "_view"
         view = bigquery.Table(view_id)
-        view.view_query = f"SELECT * except(recordstamp) FROM `{target_table_name}`"
+        view.view_query = f"SELECT * EXCEPT (recordstamp) FROM `{target_table_name}`"
     # Make an API request to create the view.
     view = client.create_table(view, exists_ok=True)
     print(f"Created {view.table_type}: {str(view.reference)}")
 
 
 def get_keys(dataset, source_table):
-    query = "SELECT  fieldname FROM {dataset}.dd03l where KEYFLAG = 'X' AND fieldname != '.INCLUDE' and tabname = \"{source_table}\"".format(
+    query = "SELECT fieldname FROM `{dataset}.dd03l` WHERE KEYFLAG = 'X' AND fieldname != '.INCLUDE' AND tabname = \"{source_table}\"".format(
         dataset=dataset, source_table=source_table.upper())
     query_job = client.query(query)
     fields = []
@@ -238,92 +241,3 @@ def copy_to_storage(gcs_bucket, prefix, directory, filename):
     blob = bucket.blob(f"{prefix}/{filename}")
     blob.upload_from_filename(f"{directory}/{filename}")
 
-
-# def get_nodes(src_dataset, mandt, setname, setclass, org_unit,
-#               table, select_fields, full_table):
-#     sets_tables = []
-
-#     query = """SELECT  setname, setclass, subclass, lineid, subsetcls, subsetscls, subsetname
-#              FROM  {src_dataset}.setnode
-#              WHERE setname = \'{setname}\' and setclass = \'{setclass}\'
-#              and subclass = \'{org_unit}\' and mandt = \'{mandt}\' """.format(
-#         src_dataset=src_dataset,
-#         setname=setname,
-#         mandt=mandt,
-#         setclass=setclass,
-#         org_unit=org_unit)
-
-#     query_job = client.query(query)
-
-#     for set in query_job:
-#         nodes = get_leafs_children( src_dataset, mandt, set,
-#                                    table, select_fields, full_table)
-#         print(nodes)
-#         sets_tables.append(nodes)
-#         node_d = dict() = nodes
-
-
-#     return sets_tables
-
-
-# def get_leafs_children( src_dataset, mandt, row, table, field, full_table):
-#     node_dict = dict()
-#     # TODO: would be nice to implement multithreaded calls
-
-#     node_dict = {
-#         "mandt": mandt,
-#         "parent": row['setname'],
-#         "parent_org": row['subclass'],
-#         "child": row['subsetname'],
-#         "child_org": row['subsetscls']
-#     }
-
-#     #Get values from setleaf (only lower child sets have these)
-#     query = """SELECT  valsign, valoption, valfrom, valto
-#             FROM  {src_dataset}.setleaf
-#             WHERE setname = \'{setname}\'
-#             and setclass = \'{setclass}\'
-#             and subclass = \'{subclass}\'
-#             and mandt = \'{mandt}\' """.format(src_dataset=src_dataset,
-#                                                setname=row['subsetname'],
-#                                                mandt=mandt,
-#                                                setclass=row['subsetcls'],
-#                                                subclass=row['subsetscls'])
-
-#     leafs = client.query(query)
-
-#     #Get values from actual MD tables (e.g., Costs center, GL Accounts, etc)
-#     for setl in leafs:
-
-#         #Build WHERE clause from SETLEAF info and clause from sets.yaml
-#         if setl['valoption'] == 'EQ':
-#             where_cls = " {field}  = \'{valfrom}\' ".format(
-#                 field=field, valfrom=setl['valfrom'])
-#         elif setl['valoption'] == 'BT':
-#             where_cls = " {field} between \'{valfrom}\' and  \'{valto}\' ".format(
-#                 field=field, valfrom=setl['valfrom'], valto=setl['valto'])
-
-#         query = """ SELECT {field}
-#                     from {src_dataset}.{table}
-#                     where mandt  = \'{mandt}\'
-#                     and {where_clause}""".format(field=field,
-#                                                  src_dataset=src_dataset,
-#                                                  table=table,
-#                                                  mandt=mandt,
-#                                                  where_clause=where_cls)
-#         #print(query)
-#         ranges = client.query(query)
-#         for line in ranges:
-#             node_dict = {
-#                 "mandt": mandt,
-#                 "parent": row['setname'],
-#                 "parent_org": row['subclass'],
-#                 "child": row['subsetname'],
-#                 "child_org": row['subsetscls'],
-#                 field: line[field]
-#             }
-#         #Recursive call for child dataset
-
-#     get_nodes(src_dataset, mandt, row['subsetname'],
-#               row['subsetcls'], row['subsetscls'], table, field, full_table)
-#     return node_dict  #This may only have a parent/child

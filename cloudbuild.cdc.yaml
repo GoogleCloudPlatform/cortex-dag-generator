@@ -13,19 +13,39 @@
 # limitations under the License.
 
 steps:
-#Run CDC DAG generation
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.0'
-    entrypoint: /bin/sh
-    args:
-    - -c
-    - 'cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA $_SQL_FLAVOUR' 
-#Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
+  # Run CDC DAG generation
   - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.0'
     entrypoint: /bin/sh
     waitFor: ['-']
     args:
     - -c
-    - 'cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA'
+    - |
+      if [ '$_DEPLOY_CDC' = "true" ] ; then
+        'cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA $_SQL_FLAVOUR' 
+      fi
+  # Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.0'
+    entrypoint: /bin/sh
+    waitFor: ['-']
+    args:
+    - -c
+    - |
+      if [ '$_DEPLOY_CDC' = "true" ] ; then    
+        'cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA'
+      fi
+  # If requested, generate external data DAGs (weather, trends, etc)
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v1.2'
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - |
+        if [ '$_GEN_EXT' = "true" ] ; then
+          ./generate_external_dags.sh \
+            --source-project '${_PJID_SRC}' \
+            --cdc-processed-dataset '${_DS_CDC}' \
+            --location '${_LOCATION}' \
+            --test-data '${_TEST_DATA}'
+        fi    
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args: ['gsutil', '-m', 'cp', '-r', './generated_dag/*.py', 'gs://${_GCS_BUCKET}/dags']
@@ -33,5 +53,12 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args: ['gsutil', '-m', 'cp', '-r', './generated_sql/*.sql', 'gs://${_GCS_BUCKET}/data/bq_data_replication']
 
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args: ['gsutil', '-m', 'cp', '-r', './generated_dag/*.ini', 'gs://${_GCS_BUCKET}/data/api_input']
+
 logsBucket: 'gs://$_GCS_LOG_BUCKET'
 timeout: 3600s
+substitutions:
+  _GEN_EXT: "true"
+options:
+  substitution_option: "ALLOW_LOOSE"

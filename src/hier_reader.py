@@ -57,7 +57,7 @@ client = bigquery.Client()
 
 # Process hierarchies
 with open('../sets.yaml') as f:
-    datasets =  yaml.load(f, Loader=yaml.SafeLoader)
+    datasets = yaml.load(f, Loader=yaml.SafeLoader)
 
     for set in datasets['sets_data']:
         logging.info(f"== Processing set {set['setname']} ==")
@@ -70,14 +70,16 @@ with open('../sets.yaml') as f:
         #                 set['where_clause'], full_table)
 
         query = """SELECT  1
-             FROM  {src_dataset}.setnode
-             WHERE setname = \'{setname}\' and setclass = \'{setclass}\'
-             and subclass = \'{org_unit}\' and mandt = \'{mandt}\' LIMIT 1 """.format(
-                                            src_dataset=source_dataset,
-                                            setname=set['setname'],
-                                            mandt=set['mandt'],
-                                            setclass=set['setclass'],
-                                            org_unit=set['orgunit'])
+             FROM `{src_dataset}.setnode`
+             WHERE setname = \'{setname}\' 
+               AND setclass = \'{setclass}\'
+               AND subclass = \'{org_unit}\' 
+               AND mandt = \'{mandt}\' 
+               LIMIT 1 """.format(src_dataset=source_dataset,
+                                  setname=set['setname'],
+                                  mandt=set['mandt'],
+                                  setclass=set['setclass'],
+                                  org_unit=set['orgunit'])
         query_job = client.query(query)
         print(query_job)
         if not query_job:
@@ -91,21 +93,21 @@ with open('../sets.yaml') as f:
 
             logging.info("Generating dag for {ft}".format(ft=full_table))
             today = datetime.datetime.now()
-            substitutes =   {
+            substitutes = {
                 "setname": set['setname'],
-                "full_table" : full_table,
-                "year" : today.year,
-                "month" : today.month,
-                "day" : today.day,
+                "full_table": full_table,
+                "year": today.year,
+                "month": today.month,
+                "day": today.day,
                 "src_project": source_project,
                 "src_dataset": source_dataset,
                 "setclass": set['setclass'],
                 "orgunit": set['orgunit'],
                 "mandt": set['mandt'],
                 "table": set['table'],
-                "select_key":  set['key_field'],
-                "where_clause":  set['where_clause'] ,
-                "load_frequency" : set['load_frequency']
+                "select_key": set['key_field'],
+                "where_clause": set['where_clause'],
+                "load_frequency": set['load_frequency']
             }
 
             generate_dag(full_table, "template_dag/dag_sql_hierarchies.py", **substitutes)
@@ -119,14 +121,3 @@ with open('../sets.yaml') as f:
         copy_to_storage(gcs_bucket, "dags/hierarchies/", "./", "dag_hierarchies_module.py")
         # copy_to_storage(gcs_bucket, "dags/hierarchies/", "./template_dag", "__init.py__")
         # copy_to_storage(gcs_bucket, "dags/hierarchies/", "./template_dag", ".airflowignore")
-
-
-# Move all files to customer's final GCS bucket - TBD move to script step with gsutil
-# for filename in os.listdir('../generated_dag/'):
-#     logging.info(f"Uploading {filename} to {gcs_bucket}/dags/")
-#     copy_to_storage(gcs_bucket, "dags", '../generated_dag', filename)
-
-# for filename in os.listdir('../generated_sql/'):
-#     logging.info(f"Uploading {filename} to {gcs_bucket}/data/data_replicaion/")
-#     copy_to_storage(gcs_bucket, "data/data_replicaion", '../generated_sql',
-#                     filename)

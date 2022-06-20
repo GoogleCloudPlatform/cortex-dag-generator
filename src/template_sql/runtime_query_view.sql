@@ -12,8 +12,12 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-  WITH S1 AS (
-      SELECT * FROM `${base_table}` order by recordstamp
+WITH
+  T1 AS (
+    SELECT ${keys}, MAX(recordstamp) AS recordstamp
+    FROM `${base_table}` 
+    WHERE operation_flag IN ('U', 'I', 'L')
+    GROUP BY ${keys}
   ),
     T1 AS (
     SELECT ${keys}, max(recordstamp) as recordstamp from `${base_table}` where operation_flag in ('U', 'I', 'L') group by ${keys} order by recordstamp
