@@ -21,7 +21,7 @@ steps:
     - -c
     - |
       if [ '$_DEPLOY_CDC' = "true" ] ; then
-        'cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA $_SQL_FLAVOUR' 
+        cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA $_SQL_FLAVOUR
       fi
   # Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
   - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.0'
@@ -31,7 +31,7 @@ steps:
     - -c
     - |
       if [ '$_DEPLOY_CDC' = "true" ] ; then    
-        'cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA'
+        cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA
       fi
   # If requested, generate external data DAGs (weather, trends, etc)
   - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v1.2'
