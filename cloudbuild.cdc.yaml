@@ -48,13 +48,31 @@ steps:
         fi    
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args: ['gsutil', '-m', 'cp', '-r', './generated_dag/*.py', 'gs://${_GCS_BUCKET}/dags']
+    entrypoint: /bin/sh
+    args: 
+      - -c
+      - |
+        if [ '$_GEN_EXT' = "true" ] || [ '$_DEPLOY_CDC' = "true" ] ; then
+          gsutil -m cp -r ./generated_dag/*.py gs://${_GCS_BUCKET}/dags
+        fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args: ['gsutil', '-m', 'cp', '-r', './generated_sql/*.sql', 'gs://${_GCS_BUCKET}/data/bq_data_replication']
+    entrypoint: /bin/sh
+    args: 
+      - -c
+      - |
+        if [ '$_GEN_EXT' = "true" ] || [ '$_DEPLOY_CDC' = "true" ] ; then
+          gsutil -m cp -r ./generated_sql/*.sql gs://${_GCS_BUCKET}/data/bq_data_replication
+        fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args: ['gsutil', '-m', 'cp', '-r', './generated_dag/*.ini', 'gs://${_GCS_BUCKET}/data/api_input']
+    entrypoint: /bin/sh
+    args: 
+      - "-c"
+      - |
+        if [ '$_GEN_EXT' = "true" ]; then
+          gsutil -m cp -r ./generated_dag/*.ini gs://${_GCS_BUCKET}/data/api_input
+        fi
 
 logsBucket: 'gs://$_GCS_LOG_BUCKET'
 timeout: 3600s
