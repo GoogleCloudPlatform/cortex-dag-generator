@@ -65,11 +65,7 @@ def generate_runtime_sql(cdc_base_table, cdc_target_view, keys, source_project):
         get_key_comparator(['DT1', 'T1'], keys))
     keys_comparator_with_t1_s1 = " AND ".join(
         get_key_comparator(['T1', 'S1'], keys))
-<<<<<<< HEAD
     keys_comparator_with_t1s1_d1 = " AND ".join(
-=======
-    keys_comparator_with_t1s1_d1 = " and ".join(
->>>>>>> gob-main
         get_key_comparator(['D1', 'T1S1'], keys))
     sql_template_file = open(
         os.path.dirname(os.path.abspath(__file__)) +
