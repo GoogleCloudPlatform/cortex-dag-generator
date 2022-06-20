@@ -12,22 +12,31 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-WITH
+WITH 
   T1 AS (
-    SELECT ${keys}, MAX(recordstamp) AS recordstamp
+    SELECT ${keys}, MAX(recordstamp) AS recordstamp 
     FROM `${base_table}` 
-    WHERE operation_flag IN ('U', 'I', 'L')
-    GROUP BY ${keys}
+    WHERE operation_flag IN ('U', 'I', 'L') 
+    GROUP BY ${keys} 
   ),
-    T1 AS (
-    SELECT ${keys}, max(recordstamp) as recordstamp from `${base_table}` where operation_flag in ('U', 'I', 'L') group by ${keys} order by recordstamp
-    ),
-    D1 AS (
-        SELECT ${keys_with_dt1_prefix}, DT1.recordstamp from `${base_table}` DT1,T1 where DT1.operation_flag ='D' and ${keys_comparator_with_dt1_t1} and DT1.recordstamp > T1.recordstamp order by recordstamp
-    ),
-    T1S1 AS (
-    SELECT  S1.* EXCEPT(operation_flag,is_deleted) from S1 INNER JOIN T1 ON ${keys_comparator_with_t1_s1} and S1.recordstamp = T1.recordstamp
-    )
-    SELECT T1S1.* EXCEPT(recordstamp) FROM T1S1 
-        LEFT OUTER JOIN D1 ON ${keys_comparator_with_t1s1_d1} and D1.recordstamp > T1S1.recordstamp
-    WHERE D1.recordstamp  is null
+  D1 AS (
+    SELECT ${keys_with_dt1_prefix}, DT1.recordstamp 
+    FROM `${base_table}` AS DT1
+    CROSS JOIN T1 
+    WHERE DT1.operation_flag ='D' 
+      AND ${keys_comparator_with_dt1_t1} 
+      AND DT1.recordstamp > T1.recordstamp 
+  ),
+  T1S1 AS (
+    SELECT S1.* EXCEPT (operation_flag, is_deleted) 
+    FROM `${base_table}` AS S1 
+    INNER JOIN T1 
+    ON ${keys_comparator_with_t1_s1} 
+      AND S1.recordstamp = T1.recordstamp
+  )
+SELECT T1S1.* EXCEPT (recordstamp) 
+FROM T1S1 
+LEFT OUTER JOIN D1 
+  ON ${keys_comparator_with_t1s1_d1} 
+    AND D1.recordstamp > T1S1.recordstamp
+WHERE D1.recordstamp IS NULL
