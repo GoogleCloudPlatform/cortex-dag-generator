@@ -1,0 +1,102 @@
+[
+    {
+        "SAP": "ACCP",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "CLNT",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "CHAR",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "LCHR",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "CUKY",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "NUMC",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "UNIT",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "RAW",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "LRAW",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "RAWSTRING",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "SSTRING",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "STRING",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "LRAW",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "CHARSTRING",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "LANG",
+        "BQ": "STRING"
+    },
+    {
+        "SAP": "INT1",
+        "BQ": "INTEGER"
+    },
+    {
+        "SAP": "INT2",
+        "BQ": "INTEGER"
+    },
+    {
+        "SAP": "INT4",
+        "BQ": "INTEGER"
+    },
+    {
+        "SAP": "INT8",
+        "BQ": "INTEGER"
+    },
+    {
+        "SAP": "FLTP",
+        "BQ": "FLOAT"
+    },
+    {
+        "SAP": "DEC",
+        "BQ": "NUMERIC"
+    },
+    {
+        "SAP": "CURR",
+        "BQ": "NUMERIC"
+    },
+    {
+        "SAP": "QUAN",
+        "BQ": "NUMERIC"
+    },
+    {
+        "SAP": "DATS",
+        "BQ": "DATE"
+    },
+    {
+        "SAP": "TIMS",
+        "BQ": "TIME"
+    }
+]

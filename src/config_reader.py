@@ -88,7 +88,8 @@ with open('../setting.yaml') as tmp:
             else:
                 try:
                     logging.info(f"Creating target table {cdc_base_table}")
-                    check_create_target(cdc_base_table, cdc_target_table, gen_test)
+                    check_create_target(
+                        cdc_base_table, cdc_target_table, gcs_bucket, gen_test)
                 except NotFound:
                     logging.error(f"Table {cdc_target_table} not found")
                     raise SystemExit(f"Table {cdc_target_table} not found")
@@ -96,18 +97,19 @@ with open('../setting.yaml') as tmp:
                 logging.info(f"Generating dag for {cdc_base_table}")
 
                 today = datetime.datetime.now()
-                substitutes =   {
-                    "base_table" : cdc_base_table,
-                    "year" : today.year,
-                    "month" : today.month, "day" : today.day,
-                    "query_file" : "cdc_" + cdc_base_table.replace(".", "_") + ".sql",
-                    "load_frequency" : table['load_frequency']
+                substitutes = {
+                    "base_table": cdc_base_table,
+                    "year": today.year,
+                    "month": today.month, "day": today.day,
+                    "query_file": "cdc_" + cdc_base_table.replace(".", "_") + ".sql",
+                    "load_frequency": table['load_frequency']
                 }
-                generate_dag(cdc_base_table, "template_dag/dag_sql.py", **substitutes)
+                generate_dag(cdc_base_table,
+                             "template_dag/dag_sql.py", **substitutes)
 
                 logging.info(f"Generating sql for {cdc_target_table}")
                 generate_sql(cdc_base_table, cdc_target_table, keys,
-                             source_project, gen_test)
+                             gcs_bucket, source_project, gen_test)
         except Exception as e:
             logging.error(
                 f"Error generating dag/sql from {table} error message {str(e)}"

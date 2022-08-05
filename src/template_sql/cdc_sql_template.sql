@@ -16,7 +16,7 @@ MERGE `${target_table}` T
 USING (
   WITH 
     S1 AS (
-      SELECT * FROM `${base_table}` s1
+      SELECT ${select_statment} FROM `${base_table}` s1
       WHERE recordstamp >= (
         SELECT IFNULL(MAX(recordstamp), TIMESTAMP('1940-12-25 05:30:00+00'))
         FROM `${target_table}`)
