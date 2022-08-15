@@ -125,6 +125,14 @@ EOF
 mkdir -p generated_dag
 mkdir -p generated_sql
 
+lowcation=$(echo "${location}" | tr '[:upper:]' '[:lower:]')
+
+## The bucket for australia-southeast1 was taken               
+if [[ "${lowcation}" == 'australia-southeast1' ]]; then
+    lowcation=australia-southeast11
+fi
+
+
 for dag in "${EXTERNAL_DAGS[@]}"; do
 
   echo "INFO: checking for external DAG $dag"
@@ -160,7 +168,6 @@ for dag in "${EXTERNAL_DAGS[@]}"; do
               "SELECT COUNT(*) FROM \`${dataset_cdc_processed}.${table_name}\`" |
               tail -1)
             if [ "$num_rows" -eq 0 ]; then
-              lowcation=$(echo "${location}" | tr '[:upper:]' '[:lower:]')
               parquet_file="gs://kittycorn-test-harness-${lowcation}/ext/${table_name}.parquet"
               echo "INFO: Loading test data for $table_name"
               bq load --location="${location}" --project_id "${project_id_src}" --noreplace --source_format=PARQUET "${dataset_cdc_processed}.${table_name}" "${parquet_file}"
