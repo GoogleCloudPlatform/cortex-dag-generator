@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: this will be read from deploy.yaml at a later phase
-EXTERNAL_DAGS=("holiday_calendar" "trends" "prod_hierarchy_texts" "weather")
+EXTERNAL_DAGS=("currency_conversion" "holiday_calendar" "trends" "prod_hierarchy_texts" "weather")
 
 #--------------------
 # Help Message
@@ -127,7 +127,7 @@ mkdir -p generated_sql
 
 lowcation=$(echo "${location}" | tr '[:upper:]' '[:lower:]')
 
-## The bucket for australia-southeast1 was taken               
+## The bucket for australia-southeast1 was taken
 if [[ "${lowcation}" == 'australia-southeast1' ]]; then
     lowcation=australia-southeast11
 fi
