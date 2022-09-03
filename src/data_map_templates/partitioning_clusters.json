@@ -1,0 +1,673 @@
+[
+    {
+        "table_name": "a073",
+        "partition_field": "datbi",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "vkorg",
+            "vtweg"
+        ]
+    },
+    {
+        "table_name": "adr6",
+        "partition_field": "date_from",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "addrnumber"
+        ]
+    },
+    {
+        "table_name": "adrc",
+        "partition_field": "date_from",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "addrnumber"
+        ]
+    },
+    {
+        "table_name": "adrct",
+        "partition_field": "date_from",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "addrnumber"
+        ]
+    },
+    {
+        "table_name": "adrt",
+        "partition_field": "date_from",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "addrnumber"
+        ]
+    },
+    {
+        "table_name": "ankt",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "anlkl"
+        ]
+    },
+    {
+        "table_name": "anla",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "anln1",
+            "bukrs"
+        ]
+    },
+    {
+        "table_name": "bkpf",
+        "partition_field": "bldat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "belnr",
+            "bukrs",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "bseg",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "belnr",
+            "bukrs",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "but000",
+        "partition_field": "crdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "partner"
+        ]
+    },
+    {
+        "table_name": "but020",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "partner",
+            "addrnumber"
+        ]
+    },
+    {
+        "table_name": "cepc",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "prctr"
+        ]
+    },
+    {
+        "table_name": "cepct",
+        "partition_field": "datbi",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "prctr",
+            "spras"
+        ]
+    },
+    {
+        "table_name": "ckmi1",
+        "partition_field": "datum",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "poper"
+        ]
+    },
+    {
+        "table_name": "coep",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kokrs",
+            "belnr"
+        ]
+    },
+    {
+        "table_name": "csks",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kostl",
+            "kokrs",
+            "datbi"
+        ]
+    },
+    {
+        "table_name": "cskt",
+        "partition_field": "datbi",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kostl",
+            "kokrs",
+            "spras"
+        ]
+    },
+    {
+        "table_name": "dd03l",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": []
+    },
+    {
+        "table_name": "ebew",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln",
+            "matnr"
+        ]
+    },
+    {
+        "table_name": "ekbe",
+        "partition_field": "bldat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln",
+            "belnr",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "ekes",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln"
+        ]
+    },
+    {
+        "table_name": "eket",
+        "partition_field": "eindt",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln"
+        ]
+    },
+    {
+        "table_name": "ekkn",
+        "partition_field": "aedat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln"
+        ]
+    },
+    {
+        "table_name": "ekko",
+        "partition_field": "aedat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln"
+        ]
+    },
+    {
+        "table_name": "ekpo",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "ebeln"
+        ]
+    },
+    {
+        "table_name": "kna1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr"
+        ]
+    },
+    {
+        "table_name": "knb1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr",
+            "bukrs"
+        ]
+    },
+    {
+        "table_name": "knc1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr",
+            "bukrs",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "knvk",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "parnr"
+        ]
+    },
+    {
+        "table_name": "knvp",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr",
+            "vkorg",
+            "vtweg"
+        ]
+    },
+    {
+        "table_name": "knvv",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr",
+            "vkorg",
+            "vtweg"
+        ]
+    },
+    {
+        "table_name": "konv",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "knumv"
+        ]
+    },
+    {
+        "table_name": "lfa1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "lifnr"
+        ]
+    },
+    {
+        "table_name": "likp",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "lips",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "makt",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "spras"
+        ]
+    },
+    {
+        "table_name": "mara",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr"
+        ]
+    },
+    {
+        "table_name": "marc",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "werks"
+        ]
+    },
+    {
+        "table_name": "mard",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "werks",
+            "lgort"
+        ]
+    },
+    {
+        "table_name": "mbew",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr"
+        ]
+    },
+    {
+        "table_name": "mchb",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "werks",
+            "lgort",
+            "CHARG"
+        ]
+    },
+    {
+        "table_name": "mkol",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "lifnr",
+            "matnr",
+            "werks",
+            "LGORT"
+        ]
+    },
+    {
+        "table_name": "mkpf",
+        "partition_field": "bldat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "mblnr",
+            "mjahr"
+        ]
+    },
+    {
+        "table_name": "mska",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "vbeln",
+            "werks",
+            "LGORT"
+        ]
+    },
+    {
+        "table_name": "msku",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "kunnr",
+            "matnr",
+            "werks",
+            "CHARG"
+        ]
+    },
+    {
+        "table_name": "mslb",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "lifnr",
+            "matnr",
+            "werks",
+            "CHARG"
+        ]
+    },
+    {
+        "table_name": "mspr",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "pspnr",
+            "matnr",
+            "werks",
+            "LGORT"
+        ]
+    },
+    {
+        "table_name": "mssa",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "matnr",
+            "vbeln",
+            "werks"
+        ]
+    },
+    {
+        "table_name": "mssq",
+        "partition_field": "ersda",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "pspnr",
+            "matnr",
+            "werks"
+        ]
+    },
+    {
+        "table_name": "prps",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "pspnr"
+        ]
+    },
+    {
+        "table_name": "qbew",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "pspnr",
+            "matnr"
+        ]
+    },
+    {
+        "table_name": "rbco",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "belnr",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "rbkp",
+        "partition_field": "bldat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "belnr",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "rseg",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "belnr",
+            "gjahr"
+        ]
+    },
+    {
+        "table_name": "setheader",
+        "partition_field": "credate",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "setname",
+            "setclass",
+            "subclass"
+        ]
+    },
+    {
+        "table_name": "setheadert",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "setname",
+            "setclass",
+            "subclass",
+            "LANGU"
+        ]
+    },
+    {
+        "table_name": "setleaf",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "setname",
+            "setclass",
+            "subclass",
+            "LINEID"
+        ]
+    },
+    {
+        "table_name": "setnode",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "setname",
+            "setclass",
+            "subclass",
+            "LINEID"
+        ]
+    },
+    {
+        "table_name": "ska1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "saknr",
+            "ktopl"
+        ]
+    },
+    {
+        "table_name": "skat",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "saknr",
+            "ktopl",
+            "spras"
+        ]
+    },
+    {
+        "table_name": "skb1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "saknr",
+            "bukrs"
+        ]
+    },
+    {
+        "table_name": "vbak",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbap",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbep",
+        "partition_field": "edatu",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln",
+            "etenr"
+        ]
+    },
+    {
+        "table_name": "vbfa",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln",
+            "vbelv"
+        ]
+    },
+    {
+        "table_name": "vbkd",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbpa",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln",
+            "parvw"
+        ]
+    },
+    {
+        "table_name": "vbrk",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbrp",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbuk",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "vbup",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "vbeln"
+        ]
+    },
+    {
+        "table_name": "wakh",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "aktnr"
+        ]
+    },
+    {
+        "table_name": "wrf1",
+        "partition_field": "erdat",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "locnr"
+        ]
+    },
+    {
+        "table_name": "wrf3",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "locnr"
+        ]
+    },
+    {
+        "table_name": "wrf6",
+        "partition_field": "",
+        "partition_type": "DAY",
+        "clustered_fields": [
+            "locnr"
+        ]
+    }
+]
