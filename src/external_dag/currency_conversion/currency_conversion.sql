@@ -17,7 +17,9 @@ IF
           CAST(99999999 - CAST(curr.gdatu AS INT) AS STRING))) OVER (PARTITION BY curr.mandt, curr.kurst, curr.fcurr, curr.tcurr ORDER BY curr.gdatu DESC), INTERVAL 1 DAY)) AS end_date
 FROM
   `{{ project_id_src }}.{{ dataset_cdc_processed }}.tcurr` AS curr
-  --- the following piece of the code can be re-structured to handle this in a better way.
+  -- CORTEX-CUSTOMER: Change dates to a shorter range if applicable
+  --- TODO:the following piece of the code can be re-structured to handle this in a better way.
+  -- TODO: Feed frequency/date from dynamically
 UNION ALL
 SELECT
   DISTINCT curr.mandt,

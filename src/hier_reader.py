@@ -1,3 +1,6 @@
+# pylint: disable=logging-fstring-interpolation consider-using-f-string
+# pylint: disable=inconsistent-quotes
+
 # Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,16 +14,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+"""Creates hierarchy related DAG files and tables."""
+
+#TODO: Make file fully lintable, and remove all pylint disabled flags.
+
 import yaml
 import sys
 import logging
 import os
 import datetime
-from dag_hierarchies_module import insert_rows, generate_hier
-from generate_query import check_create_hiertable, generate_dag, copy_to_storage
-from google.cloud.exceptions import NotFound
-from pathlib import Path
+
+from dag_hierarchies_module import generate_hier
+from generate_query import check_create_hiertable, generate_hier_dag_files
+from generate_query import copy_to_storage
+
 from google.cloud import bigquery
+from google.cloud.exceptions import NotFound
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -46,78 +56,74 @@ if not sys.argv[5]:
     raise SystemExit('No GCS bucket provided')
 gcs_bucket = sys.argv[5]
 
-if not sys.argv[6]:
-    raise SystemExit('No Test flag provided')
-gen_test = sys.argv[6]
-
-os.makedirs("../generated_dag", exist_ok=True)
-os.makedirs("../generated_sql", exist_ok=True)
+os.makedirs('../generated_dag', exist_ok=True)
+os.makedirs('../generated_sql', exist_ok=True)
 
 client = bigquery.Client()
 
 # Process hierarchies
-with open('../sets.yaml') as f:
+with open('../sets.yaml', encoding='utf-8') as f:
     datasets = yaml.load(f, Loader=yaml.SafeLoader)
 
-    for set in datasets['sets_data']:
-        logging.info(f"== Processing set {set['setname']} ==")
+    for dataset in datasets['sets_data']:
+        logging.info(f"== Processing dataset {dataset['setname']} ==")
         nodes = []
 
-        full_table = "{tgtd}.{tab}_hier".format(tgtd=target_dataset, tab=set['table'])
-
-        # nodes = get_nodes(source_dataset, set['mandt'], set['setname'],
-        #                 set['setclass'], set['orgunit'], set['table'], set['key_field'],
-        #                 set['where_clause'], full_table)
+        full_table = "{tgtd}.{tab}_hier".format(tgtd=target_dataset,
+                                                tab=dataset['table'])
 
         query = """SELECT  1
              FROM `{src_dataset}.setnode`
-             WHERE setname = \'{setname}\' 
+             WHERE setname = \'{setname}\'
                AND setclass = \'{setclass}\'
-               AND subclass = \'{org_unit}\' 
-               AND mandt = \'{mandt}\' 
+               AND subclass = \'{org_unit}\'
+               AND mandt = \'{mandt}\'
                LIMIT 1 """.format(src_dataset=source_dataset,
-                                  setname=set['setname'],
-                                  mandt=set['mandt'],
-                                  setclass=set['setclass'],
-                                  org_unit=set['orgunit'])
+                                  setname=dataset['setname'],
+                                  mandt=dataset['mandt'],
+                                  setclass=dataset['setclass'],
+                                  org_unit=dataset['orgunit'])
+
         query_job = client.query(query)
+
         print(query_job)
+
         if not query_job:
-            logging.info("Dataset {s} not found in SETNODES".format(s=set['setname']))
+            logging.info(f"Dataset {dataset['setname']} not found in SETNODES")
             continue
 
-        # Check if table exists, create it if not and populate with full initial load
+        # Check if table exists, create if not and populate with full initial
+        # load.
         try:
-            check_create_hiertable(full_table, set['key_field'])
-            # insert_rows(full_table, nodes)
+            check_create_hiertable(full_table, dataset['key_field'])
 
-            logging.info("Generating dag for {ft}".format(ft=full_table))
+            logging.info(f'Generating dag for {full_table}')
             today = datetime.datetime.now()
             substitutes = {
-                "setname": set['setname'],
-                "full_table": full_table,
-                "year": today.year,
-                "month": today.month,
-                "day": today.day,
-                "src_project": source_project,
-                "src_dataset": source_dataset,
-                "setclass": set['setclass'],
-                "orgunit": set['orgunit'],
-                "mandt": set['mandt'],
-                "table": set['table'],
-                "select_key": set['key_field'],
-                "where_clause": set['where_clause'],
-                "load_frequency": set['load_frequency']
+                'setname': dataset['setname'],
+                'full_table': full_table,
+                'year': today.year,
+                'month': today.month,
+                'day': today.day,
+                'src_project': source_project,
+                'src_dataset': source_dataset,
+                'setclass': dataset['setclass'],
+                'orgunit': dataset['orgunit'],
+                'mandt': dataset['mandt'],
+                'table': dataset['table'],
+                'select_key': dataset['key_field'],
+                'where_clause': dataset['where_clause'],
+                'load_frequency': dataset['load_frequency']
             }
 
-            generate_dag(full_table, "template_dag/dag_sql_hierarchies.py", **substitutes)
+            dag_file_name = 'cdc_' + full_table.replace('.', '_') + '.py'
+            generate_hier_dag_files(dag_file_name, **substitutes)
             generate_hier(**substitutes)
 
-        except NotFound:
-            logging.error("Table {full_table} not found".format(full_table=full_table))
-            raise SystemExit("Table {full_table} not found".format(full_table=full_table))
+        except NotFound as e:
+            logging.error(f'Table {full_table} not found')
+            raise SystemExit(f'Table {full_table} not found') from e
 
         # Copy template python processor used by all into specific directory
-        copy_to_storage(gcs_bucket, "dags/hierarchies/", "./", "dag_hierarchies_module.py")
-        # copy_to_storage(gcs_bucket, "dags/hierarchies/", "./template_dag", "__init.py__")
-        # copy_to_storage(gcs_bucket, "dags/hierarchies/", "./template_dag", ".airflowignore")
+        copy_to_storage(gcs_bucket, "dags/hierarchies", "./",
+                        "dag_hierarchies_module.py")

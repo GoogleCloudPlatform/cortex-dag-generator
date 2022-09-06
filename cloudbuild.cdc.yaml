@@ -21,7 +21,7 @@ steps:
     - -c
     - |
       if [ '$_DEPLOY_CDC' = "true" ] ; then
-        cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA $_SQL_FLAVOUR
+        cd ./src/ && python config_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_TEST_DATA $_SQL_FLAVOUR
       fi
   # Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
   - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.0'
@@ -30,8 +30,8 @@ steps:
     args:
     - -c
     - |
-      if [ '$_DEPLOY_CDC' = "true" ] ; then    
-        cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET $_TEST_DATA
+      if [ '$_DEPLOY_CDC' = "true" ] ; then
+        cd ./src/ && python hier_reader.py $_PJID_SRC $_DS_RAW $_PJID_TGT $_DS_CDC $_GCS_BUCKET
       fi
   # If requested, generate external data DAGs (weather, trends, etc)
   - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v1.2'
@@ -45,11 +45,11 @@ steps:
             --cdc-processed-dataset '${_DS_CDC}' \
             --location '${_LOCATION}' \
             --test-data '${_TEST_DATA}'
-        fi    
+        fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: /bin/sh
-    args: 
+    args:
       - -c
       - |
         if [ '$_GEN_EXT' = "true" ] || [ '$_DEPLOY_CDC' = "true" ] ; then
@@ -58,7 +58,7 @@ steps:
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: /bin/sh
-    args: 
+    args:
       - -c
       - |
         if [ '$_GEN_EXT' = "true" ] || [ '$_DEPLOY_CDC' = "true" ] ; then
@@ -67,7 +67,7 @@ steps:
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: /bin/sh
-    args: 
+    args:
       - "-c"
       - |
         if [ '$_GEN_EXT' = "true" ]; then
@@ -78,5 +78,6 @@ logsBucket: 'gs://$_GCS_LOG_BUCKET'
 timeout: 3600s
 substitutions:
   _GEN_EXT: "true"
+  _SQL_FLAVOUR: "ECC"
 options:
   substitution_option: "ALLOW_LOOSE"

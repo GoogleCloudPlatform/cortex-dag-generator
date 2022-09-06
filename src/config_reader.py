@@ -1,3 +1,5 @@
+# pylint: disable=logging-fstring-interpolation
+
 # Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,116 +13,99 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+"""Module to create CDC tables, related DAGS and hierarchy datasets."""
+
+# TODO: Make file fully lintable, and remove all pylint disabled flags.
 
 import os
 import sys
 import yaml
 import jinja2
 import logging
-from generate_query import *
-from google.cloud.exceptions import NotFound
-from pathlib import Path
+
+from generate_query import generate_runtime_view
+from generate_query import create_cdc_table
+from generate_query import generate_cdc_dag_files
 
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 if not sys.argv[1]:
-    raise SystemExit('No Source Project provided')
+    raise SystemExit("No Source Project provided")
 source_project = sys.argv[1]
 
 if not sys.argv[2]:
-    raise SystemExit('No Source Dataset provided')
-source_dataset = sys.argv[1] + '.' + sys.argv[2]
+    raise SystemExit("No Source Dataset provided")
+source_dataset = sys.argv[1] + "." + sys.argv[2]
 
 if not sys.argv[3]:
-    raise SystemExit('No Target Project provided')
+    raise SystemExit("No Target Project provided")
 target_project = sys.argv[3]
 
 if not sys.argv[4]:
-    raise SystemExit('No Target Project/Dataset provided')
-target_dataset = sys.argv[3] + '.' + sys.argv[4]
+    raise SystemExit("No Target Project/Dataset provided")
+target_dataset = sys.argv[3] + "." + sys.argv[4]
 
 if not sys.argv[5]:
-    raise SystemExit('No GCS bucket provided')
-gcs_bucket = sys.argv[5]
+    raise SystemExit("No Test flag provided")
+gen_test = sys.argv[5]
 
 if not sys.argv[6]:
-    raise SystemExit('No Test flag provided')
-gen_test = sys.argv[6]
-
-if not sys.argv[7]:
     logging.info("SQL Flavour not provided. Defaulting to ECC")
     sql_flavour = "ECC"
-sql_flavour = sys.argv[7]
-
+sql_flavour = sys.argv[6]
 
 os.makedirs("../generated_dag", exist_ok=True)
 os.makedirs("../generated_sql", exist_ok=True)
 
 # Process tables
-with open('../setting.yaml') as tmp:
+with open("../setting.yaml", encoding="utf-8") as settings_file:
 
-    t = jinja2.Template(tmp.read(), trim_blocks=True, lstrip_blocks=True)
-    f = t.render({'sql_flavour': sql_flavour})
+    t = jinja2.Template(
+        settings_file.read(), trim_blocks=True, lstrip_blocks=True
+    )
+    resolved_settings = t.render({"sql_flavour": sql_flavour})
 
-    tables_to_replicate = yaml.load(f, Loader=yaml.SafeLoader)
+    tables_to_replicate = yaml.load(resolved_settings, Loader=yaml.SafeLoader)
 
-    for table in tables_to_replicate['data_to_replicate']:
-        logging.info(f"== Processing table {table['base_table']} ==")
-        cdc_base_table = source_dataset + '.' + table['base_table']
-        if not 'target_table' in table:
-            table['target_table'] = table['base_table']
-        cdc_target_table = target_dataset + '.' + table['target_table']
+    for table in tables_to_replicate["data_to_replicate"]:
 
-        keys = []
-        keys = get_keys(source_dataset, table['base_table'])
-        if not keys:
-            e_msg = f"Keys for table {table['base_table']} not found in DD03L"
-            logging.error(e_msg)
-            raise SystemExit(e_msg)
+        table_name = table["base_table"]
+        load_frequency = table["load_frequency"]
+
+        logging.info(f"== Processing table {table_name} ==")
+
+        raw_table = source_dataset + "." + table_name
+
+        if "target_table" in table:
+            target_table = table["target_table"]
+        else:
+            target_table = table_name
+
+        cdc_table = target_dataset + "." + target_table
 
         try:
-            if table['load_frequency'] == "RUNTIME":
-                logging.info(f"Generating view {cdc_target_table}")
-                generate_runtime_sql(cdc_base_table, cdc_target_table, keys,
-                                     source_project)
+            if load_frequency == "RUNTIME":
+                logging.info(f"Generating view {cdc_table}")
+                generate_runtime_view(raw_table, cdc_table)
             else:
-                try:
-                    logging.info(f"Creating target table {cdc_base_table}")
-                    check_create_target(cdc_base_table, cdc_target_table, gen_test)
-                except NotFound:
-                    logging.error(f"Table {cdc_target_table} not found")
-                    raise SystemExit(f"Table {cdc_target_table} not found")
+                logging.info(f"Creating table {cdc_table}")
+                create_cdc_table(raw_table, cdc_table)
 
-                logging.info(f"Generating dag for {cdc_base_table}")
+                # Create files (python and sql) that will be used later to
+                # create DAG in GCP that will refresh CDC tables from RAW
+                # tables.
+                logging.info("Generating required files for DAG")
+                generate_cdc_dag_files(
+                    raw_table, cdc_table, load_frequency, gen_test
+                )
 
-                today = datetime.datetime.now()
-                substitutes =   {
-                    "base_table" : cdc_base_table,
-                    "year" : today.year,
-                    "month" : today.month, "day" : today.day,
-                    "query_file" : "cdc_" + cdc_base_table.replace(".", "_") + ".sql",
-                    "load_frequency" : table['load_frequency']
-                }
-                generate_dag(cdc_base_table, "template_dag/dag_sql.py", **substitutes)
-
-                logging.info(f"Generating sql for {cdc_target_table}")
-                generate_sql(cdc_base_table, cdc_target_table, keys,
-                             source_project, gen_test)
         except Exception as e:
             logging.error(
-                f"Error generating dag/sql from {table} error message {str(e)}"
+                f"Error generating dag/sql for {table_name}.\nError : {str(e)}"
             )
             raise SystemExit(
-                'Error while generating sql and dags. Please check the logs')
-
-# Move all files to customer's final GCS bucket - TBD move to script step with gsutil
-# for filename in os.listdir('../generated_dag/'):
-#     logging.info(f"Uploading {filename} to {gcs_bucket}/dags/")
-#     copy_to_storage(gcs_bucket, "dags", '../generated_dag', filename)
-
-# for filename in os.listdir('../generated_sql/'):
-#     logging.info(f"Uploading {filename} to {gcs_bucket}/data/data_replication/")
-#     copy_to_storage(gcs_bucket, "data/data_replication", '../generated_sql',
-#                     filename)
+                "Error while generating sql and dags. Please check the logs"
+            ) from e

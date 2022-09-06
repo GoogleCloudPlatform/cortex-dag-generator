@@ -1,5 +1,5 @@
 # Copyright 2022 Google LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,13 +29,15 @@ data_to_replicate:
   - base_table: anla
     load_frequency: "@hourly"
   - base_table: ankt
-    load_frequency: "@hourly"    
+    load_frequency: "@hourly"
   - base_table: faglflexa
     load_frequency: "@hourly"
   - base_table: konv
     load_frequency: "@daily"
+  - base_table: mseg
+    load_frequency: "@hourly"
   - base_table: prps
-    load_frequency: "@hourly"     
+    load_frequency: "@hourly"
   - base_table: vbuk
     load_frequency: "@hourly"
   - base_table: vbup
@@ -46,8 +48,14 @@ data_to_replicate:
   - base_table: adrc
     load_frequency: "@daily"
   - base_table: adrct
-    load_frequency: "@daily"    
+    load_frequency: "@daily"
   - base_table: bkpf
+    load_frequency: "@hourly"
+  - base_table: afko
+    load_frequency: "@hourly"
+  - base_table: afpo
+    load_frequency: "@hourly"
+  - base_table: aufk
     load_frequency: "@hourly"
   - base_table: bseg
     load_frequency: "@hourly"
@@ -75,6 +83,8 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: ekpo
     load_frequency: "@hourly"
+  - base_table: jest
+    load_frequency: "@daily"
   - base_table: kna1
     load_frequency: "@daily"
   - base_table: lfa1
@@ -87,8 +97,18 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: mara
     load_frequency: "@daily"
+  - base_table: marc
+    load_frequency: "@hourly"
   - base_table: mard
     load_frequency: "@hourly"
+  - base_table: mast
+    load_frequency: "@monthly"
+  - base_table: mbew
+    load_frequency: "@daily"
+  - base_table: mbewh
+    load_frequency: "@daily"
+  - base_table: mcha
+    load_frequency: "@daily"
   - base_table: rbco
     load_frequency: "@hourly"
   - base_table: rbkp
@@ -105,7 +125,17 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: skat
     load_frequency: "@daily"
+  - base_table: stas
+    load_frequency: "@monthly"
+  - base_table: stko
+    load_frequency: "@monthly"
+  - base_table: stpo
+    load_frequency: "@monthly"
   - base_table: t001
+    load_frequency: "@once"
+  - base_table: t001k
+    load_frequency: "@once"
+  - base_table: t001l
     load_frequency: "@once"
   - base_table: t001w
     load_frequency: "@once"
@@ -133,9 +163,23 @@ data_to_replicate:
     load_frequency: "@once"
   - base_table: t023t
     load_frequency: "@once"
+  - base_table: t024
+    load_frequency: "@once"
+  - base_table: t024e
+    load_frequency: "@once"
   - base_table: t134
     load_frequency: "@once"
   - base_table: t134t
+    load_frequency: "@once"
+  - base_table: t148t
+    load_frequency: "@once"
+  - base_table: t156t
+    load_frequency: "@once"
+  - base_table: t157e
+    load_frequency: "@once"
+  - base_table: t161
+    load_frequency: "@once"
+  - base_table: t161t
     load_frequency: "@once"
   - base_table: t179
     load_frequency: "@once"
@@ -155,11 +199,21 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: tcurx
     load_frequency: "@daily"
+  - base_table: tspa
+    load_frequency: "@yearly"
+  - base_table: tspat
+    load_frequency: "@yearly"
+  - base_table: tj02t
+    load_frequency: "@yearly"
   - base_table: tka02
+    load_frequency: "@yearly"
+  - base_table: tvfst
     load_frequency: "@yearly"
   - base_table: tvko
     load_frequency: "@yearly"
   - base_table: tvkot
+    load_frequency: "@yearly"
+  - base_table: tvlst
     load_frequency: "@yearly"
   - base_table: tvtw
     load_frequency: "@yearly"

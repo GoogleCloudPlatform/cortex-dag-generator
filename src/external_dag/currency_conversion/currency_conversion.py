@@ -22,8 +22,9 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
-## This DAG creates two table: currency_conversion for storing the exchange rate and other columns 
+## This DAG creates two table: currency_conversion for storing the exchange rate and other columns
 # and currency_decimal to to fix the decimal place of amounts for non-decimal-based currencies.
+# CORTEX-CUSTOMER: Check the starting date
 with DAG(
         'currency_conversion',
         template_searchpath=['/home/airflow/gcs/data/bq_data_replication/'],
@@ -35,13 +36,13 @@ with DAG(
   currency_conversion = BigQueryOperator(
         task_id='currency_conversion',
         sql='currency_conversion.sql',
-        create_disposition='WRITE_TRUNCATE', #This is one of the opions discussed, We will be making it as incremental load.
+        create_disposition='WRITE_TRUNCATE', #TODO:  Run as incremental load.
         bigquery_conn_id='sap_cdc_bq',
         use_legacy_sql=False)
   currency_decimal=BigQueryOperator(
         task_id='currency_decimal',
         sql='currency_decimal.sql',
-        create_disposition='WRITE_TRUNCATE', #This is one of the opions discussed, We will be making it as incremental load.
+        create_disposition='WRITE_TRUNCATE', #TODO:  Run as incremental load.
         bigquery_conn_id='sap_cdc_bq',
         use_legacy_sql=False)
   stop_task = DummyOperator(task_id='stop')
