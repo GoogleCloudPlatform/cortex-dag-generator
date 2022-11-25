@@ -18,7 +18,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 
-sys.path.append('/home/airflow/gcsfuse/dags/hierachies')
+sys.path.append('/home/airflow/gcsfuse/dags/hierarchies')
 from hierarchies import dag_hierarchies_module
 
 

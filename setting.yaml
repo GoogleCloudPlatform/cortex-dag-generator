@@ -34,6 +34,10 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: konv
     load_frequency: "@daily"
+    partition_details: {
+      column: "kdatu", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["stunr"]}
   - base_table: mseg
     load_frequency: "@hourly"
   - base_table: prps
@@ -91,10 +95,18 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: likp
     load_frequency: "@hourly"
+    partition_details: {
+      column: "erdat", partition_type: "time", time_grain: "month"
+    }
+    cluster_details: {columns: ["vkorg"]}
   - base_table: lips
     load_frequency: "@hourly"
+    partition_details: {
+      column: "erdat", partition_type: "time", time_grain: "month"
+    }
   - base_table: makt
     load_frequency: "@daily"
+    cluster_details: {columns: ["spras"]}
   - base_table: mara
     load_frequency: "@daily"
   - base_table: marc
@@ -207,6 +219,8 @@ data_to_replicate:
     load_frequency: "@yearly"
   - base_table: tka02
     load_frequency: "@yearly"
+  - base_table: tvarvc
+    load_frequency: "@daily"
   - base_table: tvfst
     load_frequency: "@yearly"
   - base_table: tvko
@@ -220,16 +234,21 @@ data_to_replicate:
   - base_table: tvtwt
     load_frequency: "@yearly"
   - base_table: vbak
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
+    partition_details: {
+      column: "audat", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["vkorg"]}
   - base_table: vbap
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
+    cluster_details: {columns: ["werks", "lgort"]}
   - base_table: vbep
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
   - base_table: vbfa
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
   - base_table: vbpa
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
   - base_table: vbrk
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"
   - base_table: vbrp
-    load_frequency: "RUNTIME"
+    load_frequency: "@hourly"

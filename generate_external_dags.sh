@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: this will be read from deploy.yaml at a later phase
-EXTERNAL_DAGS=("currency_conversion" "holiday_calendar" "trends" "prod_hierarchy_texts" "weather")
+EXTERNAL_DAGS=("date_dimension" "currency_conversion" "holiday_calendar" "trends" "prod_hierarchy_texts" "weather")
 
 #--------------------
 # Help Message
@@ -14,11 +14,12 @@ Generate exernal DAG files (weather, trends, etc.).
 $0 [OPTIONS]
 
 Options
--h | --help                     : Display this message
--a | source-project             : Source Dataset Project ID. Mandatory
--x | cdc-processed-dataset      : Source Dataset Name. Default: CDC_PROCESSED
--l | location                   : BigQuery dataset location. Default US
--t | test-data                  : Populate with test data. Default False
+-h | --help                       : Display this message
+-a | --source-project             : Source Dataset Project ID. Mandatory
+-x | --cdc-processed-dataset      : Source Dataset Name. Default: CDC_PROCESSED
+-l | --location                   : BigQuery dataset location. Default US
+-t | --test-data                  : Populate with test data. Default false
+-s | --run-ext-sql                : Run external DAGs SQLs Default: true
 
 HELP_USAGE
 
@@ -32,6 +33,11 @@ validate() {
   if [ -z "${project_id_src-}" ]; then
     echo 'ERROR: "source-project" is required. See help for details.'
     exit 1
+  fi
+
+  if [ -z "${run_ext_sql-}" ]; then
+    echo 'INFO: External DAGs SQL files will be executed.'
+    run_ext_sql=true
   fi
 
   if [ -z "${test_data-}" ]; then
@@ -62,7 +68,7 @@ validate() {
 #--------------------
 
 set -o errexit -o noclobber -o nounset -o pipefail
-params="$(getopt -o ha:x:l:t: -l help,source-project:,cdc-processed-dataset:,location:,test-data: --name "$0" -- "$@")"
+params="$(getopt -o ha:x:l:t:s: -l help,source-project:,cdc-processed-dataset:,location:,test-data:,run-ext-sql: --name "$0" -- "$@")"
 eval set -- "$params"
 
 while true; do
@@ -86,6 +92,10 @@ while true; do
       ;;
     -t | --test-data)
       test_data=$2
+      shift 2
+      ;;
+    -s | --run-ext-sql)
+      run_ext_sql=$2
       shift 2
       ;;
     --)
@@ -157,16 +167,28 @@ for dag in "${EXTERNAL_DAGS[@]}"; do
       if [[ $p = *.sql ]]; then
         query=$(jinja -d data.json "${p}")
         echo "${query}" >"generated_sql/${file}"
-        bq query --batch --project_id="${project_id_src}" --location="${location}" --use_legacy_sql=false "${query}"
-        if [ $? = 1 ] && [ ${test_data} != true ]; then
+        if [[ "${run_ext_sql}" == "true" ]]
+        then
+          bq query --batch --project_id="${project_id_src}" --location="${location}" --use_legacy_sql=false "${query}"
+          _sql_code=$?
+        else
+          echo "${file} will not be executed (--run-ext-sql is false)."
+          _sql_code=1
+        fi
+        if [ $_sql_code -ne 0 ] && [ ${test_data} != true ]; then
           success=1
         else
           if [[ ${test_data} == true ]]; then
             table_name="${file%.*}"
-            num_rows=$(bq query --location="${location}" --project_id="${project_id_src}" \
+            num_rows_str=$(bq query --location="${location}" --project_id="${project_id_src}" \
               --use_legacy_sql=false --format=csv --quiet \
-              "SELECT COUNT(*) FROM \`${dataset_cdc_processed}.${table_name}\`" |
-              tail -1)
+              "SELECT COUNT(*) FROM \`${dataset_cdc_processed}.${table_name}\`")
+            if [[ $? -ne 0 ]]
+            then
+              num_rows=0
+            else
+              num_rows=$(echo -e "${num_rows_str}" | tail -1)
+            fi
             if [ "$num_rows" -eq 0 ]; then
               parquet_file="gs://kittycorn-test-harness-${lowcation}/ext/${table_name}.parquet"
               echo "INFO: Loading test data for $table_name"

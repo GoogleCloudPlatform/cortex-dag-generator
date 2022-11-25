@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable-all
+
 from __future__ import print_function
 from airflow.operators.dummy_operator import DummyOperator
 
@@ -23,6 +25,7 @@ from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 default_dag_args = {
    'depends_on_past': False,
    'start_date': datetime(${year}, ${month}, ${day}),
+   'catchup': False,
    'retries': 1,
    'retry_delay': timedelta(minutes=30),
 }
