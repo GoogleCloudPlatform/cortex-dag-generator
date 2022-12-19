@@ -37,6 +37,7 @@ _CONFIG_FILE = "../setting.yaml"
 _GENERATED_DAG_DIR = "../generated_dag"
 _GENERATED_SQL_DIR = "../generated_sql"
 
+
 def process_table(table_config: dict, source_dataset: str, target_dataset: str,
                   gen_test: str) -> None:
     try:
@@ -94,21 +95,18 @@ def main():
     source_dataset = source_project + "." + sys.argv[2]
 
     if not sys.argv[3]:
-        raise SystemExit("ERROR: No Target Project argument provided!")
-    target_project = sys.argv[3]
+        raise SystemExit("ERROR: No Target Dataset argument provided!")
+    target_dataset = source_project + "." + sys.argv[3]
 
     if not sys.argv[4]:
-        raise SystemExit("ERROR: No Target Project/Dataset argument provided!")
-    target_dataset = target_project + "." + sys.argv[4]
+        raise SystemExit("ERROR: No Test flag argument provided")
+    gen_test = sys.argv[4]
 
     if not sys.argv[5]:
-        raise SystemExit("ERROR: No Test flag argument provided")
-    gen_test = sys.argv[5]
-
-    if not sys.argv[6]:
         logging.info("SQL Flavour not provided. Defaulting to ECC.")
         sql_flavour = "ECC"
-    sql_flavour = sys.argv[6]
+    else:
+        sql_flavour = sys.argv[5]
 
     os.makedirs(_GENERATED_DAG_DIR, exist_ok=True)
     os.makedirs(_GENERATED_SQL_DIR, exist_ok=True)

@@ -12,8 +12,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
--- noqa:disable=all
-
 WITH
   -- We need to dedupe the source table to handle occasional dups from SLT connector.
   SourceTable AS (
@@ -52,3 +50,4 @@ LEFT OUTER JOIN D1
   ON ${keys_comparator_with_t1s1_d1}
     AND D1.recordstamp > T1S1.recordstamp
 WHERE D1.recordstamp IS NULL
+

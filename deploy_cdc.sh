@@ -24,7 +24,23 @@ gen_test=$7
 sql_flavour=$8
 gen_external_data=$9
 echo "Deploying CDC and unfolding hierarchies"
+
+if [[ "${log_bucket}" == "" ]]
+then
+    # GCS_BUCKET in Data Foundation sap_config.env is the log bucket
+    if [[ "${GCS_BUCKET}" != "" ]]
+    then
+        export log_bucket="${GCS_BUCKET}"
+    else
+        echo "No Build Logs Bucket name provided."
+        cloud_build_project=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
+        export _GCS_LOG_BUCKET="${cloud_build_project}_cloudbuild"
+        export log_bucket="${_GCS_LOG_BUCKET}"
+        echo "Using ${_GCS_LOG_BUCKET}"
+    fi
+fi
+
 #"Source" in this context is where data is replicated and "Target" is where the CDC results are peristed
-gcloud builds submit --config=cloudbuild.cdc.yaml --substitutions=_PJID_SRC="$project_id_src",_DS_RAW="$dataset_repl",_PJID_TGT="$project_id_tgt",_DS_CDC="$dataset_tgt",_GCS_BUCKET="$tgt_bucket",_GCS_LOG_BUCKET="$log_bucket",_TEST_DATA="$gen_test",_SQL_FLAVOUR="$sql_flavour",_GEN_EXT="$gen_external_data" ./src/SAP_CDC/
+gcloud builds submit --config=cloudbuild.cdc.yaml --substitutions=_PJID_SRC="$project_id_src",_DS_RAW="$dataset_repl",_PJID_TGT="$project_id_tgt",_DS_CDC="$dataset_tgt",_GCS_BUCKET="$tgt_bucket",_GCS_LOG_BUCKET="$log_bucket",_TEST_DATA="$gen_test",_SQL_FLAVOUR="$sql_flavour",_GEN_EXT="$gen_external_data" .
 
 

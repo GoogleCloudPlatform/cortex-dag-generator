@@ -45,16 +45,12 @@ if not sys.argv[2]:
 source_dataset = sys.argv[1] + "." + sys.argv[2]
 
 if not sys.argv[3]:
-    raise SystemExit("No Target Project provided")
-target_project = sys.argv[3]
+    raise SystemExit("No Target Dataset provided")
+target_dataset = sys.argv[1] + "." + sys.argv[3]
 
 if not sys.argv[4]:
-    raise SystemExit("No Target Project/Dataset provided")
-target_dataset = sys.argv[3] + "." + sys.argv[4]
-
-if not sys.argv[5]:
     raise SystemExit("No GCS bucket provided")
-gcs_bucket = sys.argv[5]
+gcs_bucket = sys.argv[4]
 
 os.makedirs("../generated_dag", exist_ok=True)
 os.makedirs("../generated_sql", exist_ok=True)

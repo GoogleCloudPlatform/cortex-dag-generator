@@ -12,8 +12,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
--- noqa:disable=all
-
 MERGE `${target_table}` AS T
 USING (
   WITH
@@ -56,3 +54,4 @@ WHEN MATCHED AND S.operation_flag = 'D' THEN
   DELETE
 WHEN MATCHED AND S.operation_flag = 'U' THEN
   UPDATE SET ${update_fields};
+

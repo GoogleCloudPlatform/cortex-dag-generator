@@ -37,12 +37,12 @@ validate() {
 
   if [ -z "${run_ext_sql-}" ]; then
     echo 'INFO: External DAGs SQL files will be executed.'
-    run_ext_sql=true
+    run_ext_sql="true"
   fi
 
   if [ -z "${test_data-}" ]; then
     echo 'INFO: test data will not be loaded.'
-    test_data=false
+    test_data="false"
   fi
 
   if [ -z "${location-}" ]; then
@@ -91,11 +91,11 @@ while true; do
       shift 2
       ;;
     -t | --test-data)
-      test_data=$2
+      test_data="${2}"
       shift 2
       ;;
     -s | --run-ext-sql)
-      run_ext_sql=$2
+      run_ext_sql="${2}"
       shift 2
       ;;
     --)
@@ -175,11 +175,18 @@ for dag in "${EXTERNAL_DAGS[@]}"; do
           echo "${file} will not be executed (--run-ext-sql is false)."
           _sql_code=1
         fi
-        if [ $_sql_code -ne 0 ] && [ ${test_data} != true ]; then
-          success=1
+        if [ $_sql_code -ne 0 ] && [[ "${test_data}" != "true" ]]; then
+          if [[ "${run_ext_sql}" != "true" ]]
+          then
+            echo "${file} was not executed (--run-ext-sql is false) and --test-data is ${test_data}. This is unusual, but ok."
+          else
+            echo "ERROR: ${file} execution was not successful and --test-data is false."
+            success=1
+          fi
         else
-          if [[ ${test_data} == true ]]; then
+          if [[ "${test_data}" == "true" ]]; then
             table_name="${file%.*}"
+            echo "Processing test data for ${table_name}"
             num_rows_str=$(bq query --location="${location}" --project_id="${project_id_src}" \
               --use_legacy_sql=false --format=csv --quiet \
               "SELECT COUNT(*) FROM \`${dataset_cdc_processed}.${table_name}\`")
