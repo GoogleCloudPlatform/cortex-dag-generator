@@ -23,12 +23,10 @@ USING (
     ),
     -- To handle occasional dups from SLT connector
     S1 AS (
-      SELECT * EXCEPT(row_num)
-      FROM (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY ${keys}, recordstamp ORDER BY recordstamp) AS row_num
-        FROM S0
-      )
-      WHERE row_num = 1
+      SELECT r.* FROM (
+                      SELECT ${keys}, ARRAY_AGG(S0 ORDER BY S0.recordstamp DESC LIMIT 1)[OFFSET(0)] r
+                      FROM S0 GROUP BY ${keys}
+                      ) 
     ),
     T1 AS (
       SELECT ${keys}, MAX(recordstamp) AS recordstamp
