@@ -19,6 +19,7 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
+from airflow.version import version as AIRFLOW_VERSION
 
 default_args = {
     'retries': 1,
@@ -36,22 +37,39 @@ with DAG(
         start_date=datetime(2022, 8, 11),
 ) as dag:
     start_task = DummyOperator(task_id='start')
+    if AIRFLOW_VERSION.startswith("1."):
   ## This task loads currency conversion in the table at daily level.
-    currency_conversion = BigQueryOperator(
-        task_id='currency_conversion',
-        sql='currency_conversion.sql',
-        create_disposition='WRITE_TRUNCATE',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
-  ## This task loads currency decimal table to fix the decimal
-  ## place of amounts for non-decimal-based currencies.
-    currency_decimal=BigQueryOperator(
-        task_id='currency_decimal',
-        sql='currency_decimal.sql',
-        create_disposition='WRITE_TRUNCATE',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
-    stop_task = DummyOperator(task_id='stop')
+      currency_conversion = BigQueryOperator(
+          task_id='currency_conversion',
+          sql='currency_conversion.sql',
+          create_disposition='WRITE_TRUNCATE',
+          bigquery_conn_id='sap_cdc_bq',
+          use_legacy_sql=False)
+    ## This task loads currency decimal table to fix the decimal
+    ## place of amounts for non-decimal-based currencies.
+      currency_decimal=BigQueryOperator(
+          task_id='currency_decimal',
+          sql='currency_decimal.sql',
+          create_disposition='WRITE_TRUNCATE',
+          bigquery_conn_id='sap_cdc_bq',
+          use_legacy_sql=False)
+      stop_task = DummyOperator(task_id='stop')
+    else:
+      currency_conversion = BigQueryOperator(
+          task_id='currency_conversion',
+          sql='currency_conversion.sql',
+          create_disposition='WRITE_TRUNCATE',
+          gcp_conn_id='sap_cdc_bq',
+          use_legacy_sql=False)
+    ## This task loads currency decimal table to fix the decimal
+    ## place of amounts for non-decimal-based currencies.
+      currency_decimal=BigQueryOperator(
+          task_id='currency_decimal',
+          sql='currency_decimal.sql',
+          create_disposition='WRITE_TRUNCATE',
+          gcp_conn_id='sap_cdc_bq',
+          use_legacy_sql=False)
+      stop_task = DummyOperator(task_id='stop')
   # pylint:disable=pointless-statement
     (start_task >> currency_conversion >>
      currency_decimal >> stop_task)

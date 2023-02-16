@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
+from airflow.version import version as AIRFLOW_VERSION
 
 default_args = {
     'depends_on_past': False,
@@ -29,12 +30,20 @@ with DAG(
         start_date=datetime(2022, 11, 2),
 ) as dag:
     start_task = DummyOperator(task_id='start')
-    calendar_date_dim = BigQueryOperator(
-        task_id='calendar_date_dim',
-        sql='calendar_date_dim.sql',
-        create_disposition='WRITE_TRUNCATE',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
+    if AIRFLOW_VERSION.startswith("1."):
+        calendar_date_dim = BigQueryOperator(
+            task_id='calendar_date_dim',
+            sql='calendar_date_dim.sql',
+            create_disposition='WRITE_TRUNCATE',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+    else:
+        calendar_date_dim = BigQueryOperator(
+            task_id='calendar_date_dim',
+            sql='calendar_date_dim.sql',
+            create_disposition='WRITE_TRUNCATE',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
     stop_task = DummyOperator(task_id='stop')
-  # pylint:disable=pointless-statement
+    # pylint:disable=pointless-statement
     (start_task >> calendar_date_dim >> stop_task)

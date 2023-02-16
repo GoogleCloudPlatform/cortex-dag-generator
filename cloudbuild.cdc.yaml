@@ -14,7 +14,7 @@
 
 steps:
   # Run CDC DAG generation
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.5'
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
     id: config_reader
     entrypoint: /bin/bash
     waitFor: ['-']
@@ -37,7 +37,7 @@ steps:
         cd ./src/ && python config_reader.py $$_PJID_SRC_ $$_DS_RAW_ $$_DS_CDC_ $$_TEST_DATA_ $$_SQL_FLAVOUR_
       fi
   # Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn-cdc:v1.5'
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
     id: hier_reader
     entrypoint: /bin/bash
     waitFor: ['-']
@@ -60,7 +60,7 @@ steps:
         cd ./src/ && python hier_reader.py $$_PJID_SRC_ $$_DS_RAW_ $$_DS_CDC_ $$_GCS_BUCKET_
       fi
   # If requested, generate external data DAGs (weather, trends, etc)
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v1.5'
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
     id: generate_external_dags
     waitFor: ['config_reader', 'hier_reader']
     entrypoint: /bin/bash
@@ -108,7 +108,13 @@ steps:
 
         if [[ "$${_GEN_EXT_}" == "true" ]] || [[ "$${_DEPLOY_CDC_}" == "true" ]]; then
           echo "Running copy_dag_py_files_to_gcs"
-          gsutil -m cp -r './generated_dag/*.py' gs://$${_GCS_BUCKET_}/dags
+          generated_files=$(shopt -s nullglob dotglob; echo ./generated_dag/*.py)
+          if (( ${#generated_files} ))
+          then
+            gsutil -m cp -r './generated_dag/*.py' gs://$${_GCS_BUCKET_}/dags
+          else
+            echo "🔪🔪🔪No Python files found under generated_dag folder or the folder does not exist. Skipping copy.🔪🔪🔪"
+          fi
         fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -131,7 +137,13 @@ steps:
 
         if [[ "$${_GEN_EXT_}" == "true" ]] || [[ "$${_DEPLOY_CDC_}" == "true" ]]; then
           echo "Running copy_dag_sql_files_to_gcs"
-          gsutil -m cp -r './generated_sql/*.sql' gs://$${_GCS_BUCKET_}/data/bq_data_replication
+          generated_files=$(shopt -s nullglob dotglob; echo ./generated_sql/*.sql)
+          if (( ${#generated_files} ))
+          then
+            gsutil -m cp -r './generated_sql/*.sql' gs://$${_GCS_BUCKET_}/data/bq_data_replication
+          else
+            echo "🔪🔪🔪No SQL files found under generated_sql folder or the folder does not exist. Skipping copy.🔪🔪🔪"
+          fi
         fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -154,7 +166,14 @@ steps:
 
         if [[ "$${_GEN_EXT_}" == "true" ]]; then
           echo "Running copy_dag_ini_files_to_gcs"
-          gsutil -m cp -r './generated_dag/*.ini' gs://$${_GCS_BUCKET_}/data/api_input
+          generated_files=$(shopt -s nullglob dotglob; echo ./generated_dag/*.ini)
+          if (( ${#generated_files} ))
+          then
+            gsutil -m cp -r './generated_dag/*.ini' gs://$${_GCS_BUCKET_}/data/api_input
+          else
+            echo "🔪🔪🔪No INI files found under generated_dag folder or the folder does not exist. Skipping copy.🔪🔪🔪"
+          fi
+
         fi
 
 logsBucket: 'gs://$_GCS_LOG_BUCKET'

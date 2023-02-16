@@ -63,6 +63,7 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: bseg
     load_frequency: "@hourly"
+    cluster_details: {columns: ["mandt", "bukrs"]}
   - base_table: but000
     load_frequency: "@daily"
   - base_table: but020
@@ -77,16 +78,32 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: ekbe
     load_frequency: "@hourly"
+    partition_details: {
+      column: "budat", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["mandt", "vgabe", "ebeln", "bwart"]}
   - base_table: ekes
     load_frequency: "@hourly"
   - base_table: eket
     load_frequency: "@hourly"
+    partition_details: {
+      column: "eindt", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["mandt", "ebeln"]}
   - base_table: ekkn
     load_frequency: "@hourly"
   - base_table: ekko
     load_frequency: "@hourly"
+    partition_details: {
+      column: "bedat", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["mandt", "ebeln"]}
   - base_table: ekpo
     load_frequency: "@hourly"
+    partition_details: {
+      column: "aedat", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["mandt", "ebeln"]}
   - base_table: jest
     load_frequency: "@daily"
   - base_table: kna1
@@ -252,3 +269,5 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: vbrp
     load_frequency: "@hourly"
+  - base_table: mch1
+    load_frequency: "@daily"

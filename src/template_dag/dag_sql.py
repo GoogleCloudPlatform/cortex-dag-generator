@@ -20,6 +20,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from datetime import timedelta, datetime
 import airflow
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
+from airflow.version import version as AIRFLOW_VERSION
 
 
 default_dag_args = {
@@ -35,11 +36,19 @@ with airflow.DAG("CDC_BigQuery_${base_table}",
                  default_args=default_dag_args,
                  schedule_interval="${load_frequency}") as dag:
     start_task = DummyOperator(task_id="start")
-    copy_records = BigQueryOperator(
-        task_id='merge_query_records',
-        sql="${query_file}",
-        create_disposition='CREATE_IF_NEEDED',
-        bigquery_conn_id="sap_cdc_bq",
-        use_legacy_sql=False)
+    if AIRFLOW_VERSION.startswith("1."):
+        copy_records = BigQueryOperator(
+            task_id='merge_query_records',
+            sql="${query_file}",
+            create_disposition='CREATE_IF_NEEDED',
+            bigquery_conn_id="sap_cdc_bq",
+            use_legacy_sql=False)
+    else:
+        copy_records = BigQueryOperator(
+            task_id='merge_query_records',
+            sql="${query_file}",
+            create_disposition='CREATE_IF_NEEDED',
+            gcp_conn_id="sap_cdc_bq",
+            use_legacy_sql=False)
     stop_task = DummyOperator(task_id="stop")
     start_task >> copy_records >> stop_task

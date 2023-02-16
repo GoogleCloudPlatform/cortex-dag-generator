@@ -21,7 +21,7 @@ Executes relevant nodes to create underlying tables as well as final table.
 from airflow import DAG
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.operators.dummy_operator import DummyOperator
-
+from airflow.version import version as AIRFLOW_VERSION
 from datetime import datetime, timedelta
 
 default_args = {
@@ -41,26 +41,49 @@ with DAG(
 
     start_task = DummyOperator(task_id='start')
 
-    refresh_postcode_table = BigQueryOperator(
-        task_id='refresh_postcode_table',
-        sql='postcode.sql',
-        create_disposition='CREATE_IF_NEEDED',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
+    if AIRFLOW_VERSION.startswith("1."):
+        refresh_postcode_table = BigQueryOperator(
+            task_id='refresh_postcode_table',
+            sql='postcode.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
 
-    update_daily_weather_table = BigQueryOperator(
-        task_id='update_daily_weather_table',
-        sql='weather_daily.sql',
-        create_disposition='CREATE_IF_NEEDED',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
+        update_daily_weather_table = BigQueryOperator(
+            task_id='update_daily_weather_table',
+            sql='weather_daily.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
 
-    refresh_weekly_weather_table = BigQueryOperator(
-        task_id='refresh_weekly_weather_table',
-        sql='weather_weekly.sql',
-        create_disposition='CREATE_IF_NEEDED',
-        bigquery_conn_id='sap_cdc_bq',
-        use_legacy_sql=False)
+        refresh_weekly_weather_table = BigQueryOperator(
+            task_id='refresh_weekly_weather_table',
+            sql='weather_weekly.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+
+    else:
+        refresh_postcode_table = BigQueryOperator(
+            task_id='refresh_postcode_table',
+            sql='postcode.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+
+        update_daily_weather_table = BigQueryOperator(
+            task_id='update_daily_weather_table',
+            sql='weather_daily.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+
+        refresh_weekly_weather_table = BigQueryOperator(
+            task_id='refresh_weekly_weather_table',
+            sql='weather_weekly.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
 
     stop_task = DummyOperator(task_id='stop')
 
