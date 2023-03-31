@@ -50,7 +50,7 @@ with DAG(
     if AIRFLOW_VERSION.startswith("1."):
         t1 = BigQueryOperator(
             task_id='snapshot_creation_daily',
-            sql='stock_weekly_snapshot_update_daily.sql',
+            sql='stock_weekly_snapshots_update_daily.sql',
             create_disposition='WRITE_TRUNCATE',
             bigquery_conn_id='sap_cdc_bq',
             use_legacy_sql=False
@@ -58,7 +58,7 @@ with DAG(
     else:
         t1 = BigQueryOperator(
             task_id='snapshot_creation_daily',
-            sql='stock_weekly_snapshot_update_daily.sql',
+            sql='stock_weekly_snapshots_update_daily.sql',
             create_disposition='WRITE_TRUNCATE',
             gcp_conn_id='sap_cdc_bq',
             use_legacy_sql=False
