@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,39 +37,45 @@ with DAG(
         start_date=datetime(2022, 8, 11),
 ) as dag:
     start_task = DummyOperator(task_id='start')
+
     if AIRFLOW_VERSION.startswith("1."):
-  ## This task loads currency conversion in the table at daily level.
-      currency_conversion = BigQueryOperator(
-          task_id='currency_conversion',
-          sql='currency_conversion.sql',
-          create_disposition='WRITE_TRUNCATE',
-          bigquery_conn_id='sap_cdc_bq',
-          use_legacy_sql=False)
+  ## This task creates currency conversion table and loads data into it daily.
+        currency_conversion = BigQueryOperator(
+            task_id='currency_conversion',
+            sql='currency_conversion.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            write_disposition='WRITE_TRUNCATE',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
     ## This task loads currency decimal table to fix the decimal
     ## place of amounts for non-decimal-based currencies.
-      currency_decimal=BigQueryOperator(
-          task_id='currency_decimal',
-          sql='currency_decimal.sql',
-          create_disposition='WRITE_TRUNCATE',
-          bigquery_conn_id='sap_cdc_bq',
-          use_legacy_sql=False)
-      stop_task = DummyOperator(task_id='stop')
+        currency_decimal=BigQueryOperator(
+            task_id='currency_decimal',
+            sql='currency_decimal.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            write_disposition='WRITE_TRUNCATE',
+            bigquery_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+
+        stop_task = DummyOperator(task_id='stop')
     else:
-      currency_conversion = BigQueryOperator(
-          task_id='currency_conversion',
-          sql='currency_conversion.sql',
-          create_disposition='WRITE_TRUNCATE',
-          gcp_conn_id='sap_cdc_bq',
-          use_legacy_sql=False)
+        currency_conversion = BigQueryOperator(
+            task_id='currency_conversion',
+            sql='currency_conversion.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            write_disposition='WRITE_TRUNCATE',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
     ## This task loads currency decimal table to fix the decimal
     ## place of amounts for non-decimal-based currencies.
-      currency_decimal=BigQueryOperator(
-          task_id='currency_decimal',
-          sql='currency_decimal.sql',
-          create_disposition='WRITE_TRUNCATE',
-          gcp_conn_id='sap_cdc_bq',
-          use_legacy_sql=False)
-      stop_task = DummyOperator(task_id='stop')
+        currency_decimal=BigQueryOperator(
+            task_id='currency_decimal',
+            sql='currency_decimal.sql',
+            create_disposition='CREATE_IF_NEEDED',
+            write_disposition='WRITE_TRUNCATE',
+            gcp_conn_id='sap_cdc_bq',
+            use_legacy_sql=False)
+
+        stop_task = DummyOperator(task_id='stop')
   # pylint:disable=pointless-statement
-    (start_task >> currency_conversion >>
-     currency_decimal >> stop_task)
+    (start_task >>  currency_conversion >> currency_decimal >> stop_task)

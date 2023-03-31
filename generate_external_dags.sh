@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: this will be read from deploy.yaml at a later phase
-EXTERNAL_DAGS=("date_dimension" "currency_conversion" "holiday_calendar" "trends" "prod_hierarchy_texts" "weather")
+EXTERNAL_DAGS=("date_dimension" "currency_conversion" "holiday_calendar" "trends" "prod_hierarchy_texts" "weather" "inventory_snapshots")
 
 #--------------------
 # Help Message
@@ -20,6 +20,8 @@ Options
 -l | --location                   : BigQuery dataset location. Default US
 -t | --test-data                  : Populate with test data. Default false
 -s | --run-ext-sql                : Run external DAGs SQLs Default: true
+-f | --sql-flavour                : S4 or ECC flavour
+-m | --mandt                      : MANDT (Client Id)
 
 HELP_USAGE
 
@@ -61,6 +63,16 @@ validate() {
     fi
   fi
 
+  if [ -z "${sql_flavour-}" ]; then
+    echo 'INFO: "sql_flavour" not provided. Defaulting to ecc.'
+    sql_flavour="ecc"
+  fi
+
+  if [ -z "${mandt-}" ]; then
+    echo 'INFO: "mandt" not provided. Defaulting to 100.'
+    mandt="100"
+  fi
+
 }
 
 #--------------------
@@ -68,7 +80,7 @@ validate() {
 #--------------------
 
 set -o errexit -o noclobber -o nounset -o pipefail
-params="$(getopt -o ha:x:l:t:s: -l help,source-project:,cdc-processed-dataset:,location:,test-data:,run-ext-sql: --name "$0" -- "$@")"
+params="$(getopt -o ha:x:l:t:s:f:m: -l help,source-project:,cdc-processed-dataset:,location:,test-data:,run-ext-sql:,sql-flavour:,mandt: --name "$0" -- "$@")"
 eval set -- "$params"
 
 while true; do
@@ -98,6 +110,14 @@ while true; do
       run_ext_sql="${2}"
       shift 2
       ;;
+    -f | --sql-flavour)
+      sql_flavour="${2}"
+      shift 2
+      ;;
+    -m | --mandt)
+      mandt="${2}"
+      shift 2
+      ;;
     --)
       shift
       break
@@ -122,7 +142,9 @@ success=0
 cat <<EOF >data.json
 {
   "project_id_src": "${project_id_src}",
-  "dataset_cdc_processed": "${dataset_cdc_processed}"
+  "dataset_cdc_processed": "${dataset_cdc_processed}",
+  "sql_flavour": "${sql_flavour}",
+  "mandt": "${mandt}"
 }
 EOF
 
@@ -161,6 +183,11 @@ for dag in "${EXTERNAL_DAGS[@]}"; do
 
       if [[ $p = *.ini ]]; then
         jinja -d data.json "${p}" >"generated_dag/${file}"
+        if [ $? = 1 ]; then success=1; fi
+      fi
+
+      if [[ $p = *.templatesql ]]; then
+        jinja -d data.json "${p}" >"generated_sql/${file%.*}.sql"
         if [ $? = 1 ]; then success=1; fi
       fi
 

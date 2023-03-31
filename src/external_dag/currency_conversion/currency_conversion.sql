@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `{{ project_id_src }}.{{ dataset_cdc_processed }}.currency_conversion`
+CREATE OR REPLACE TABLE `{{ project_id_src }}.{{ dataset_cdc_processed }}.currency_conversion`
 (
   mandt STRING,
   kurst STRING,

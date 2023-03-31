@@ -85,7 +85,10 @@ steps:
             --cdc-processed-dataset "$${_DS_CDC_}" \
             --location "$${_LOCATION_}" \
             --test-data "$${_TEST_DATA_}" \
-            --run-ext-sql "$${_RUN_EXT_SQL_}"
+            --run-ext-sql "$${_RUN_EXT_SQL_}" \
+            --sql-flavour "$${_SQL_FLAVOUR_}" \
+            --mandt "$${_MANDT_}"
+
         fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'

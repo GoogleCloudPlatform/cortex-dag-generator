@@ -24,6 +24,10 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: prcd_elements
     load_frequency: "@hourly"
+  - base_table: ckmlhd
+    load_frequency: "@daily"
+  - base_table: ckmlcr
+    load_frequency: "@daily"
 {% endif %}
 {% if sql_flavour.upper() == 'ECC' %}
   - base_table: anla
@@ -46,6 +50,8 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: vbup
     load_frequency: "@hourly"
+  - base_table: msfd
+    load_frequency: "@weekly"
 {% endif %}
   - base_table: adr6
     load_frequency: "@daily"
@@ -271,3 +277,11 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: mch1
     load_frequency: "@daily"
+  - base_table: mska
+    load_frequency: "@weekly"
+  - base_table: mslb
+    load_frequency: "@weekly"
+  - base_table: msku
+    load_frequency: "@weekly"
+  - base_table: mkol
+    load_frequency: "@weekly"
