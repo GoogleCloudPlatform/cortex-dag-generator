@@ -36,6 +36,52 @@ steps:
         cd ./src/ && python config_reader.py $$_PJID_SRC_ $$_DS_RAW_ $$_DS_CDC_ $$_TEST_DATA_ $$_SQL_FLAVOUR_
       fi
 
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
+    id: copy_dag_py_files_to_gcs
+    waitFor: ['config_reader']
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        if [[ "${_TGT_BUCKET}" != "" ]]
+        then
+          _TGT_BUCKET_="${_TGT_BUCKET}"
+        else
+          _TGT_BUCKET_=$(jq -r ."targetBucket" "${_CONFIG_FILE}")
+        fi
+
+        echo "Running copy_dag_py_files_to_gcs"
+        generated_files=$(shopt -s nullglob dotglob; echo ./generated_dag/*.py)
+        if (( ${#generated_files} ))
+        then
+          gsutil -m cp -r './generated_dag/*.py' gs://$${_TGT_BUCKET_}/dags/
+        else
+          echo "🔪🔪🔪No Python files found under generated_dag folder or the folder does not exist. Skipping copy.🔪🔪🔪"
+        fi
+
+  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
+    id: copy_dag_sql_files_to_gcs
+    waitFor: ['config_reader']
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        if [[ "${_TGT_BUCKET}" != "" ]]
+        then
+          _TGT_BUCKET_="${_TGT_BUCKET}"
+        else
+          _TGT_BUCKET_=$(jq -r ."targetBucket" "${_CONFIG_FILE}")
+        fi
+
+        echo "Copying DAG SQL files to GCS..."
+        generated_files=$(shopt -s nullglob dotglob; echo ./generated_sql/*.sql)
+        if (( ${#generated_files} ))
+        then
+          gsutil -m cp -r './generated_sql/*.sql' gs://$${_TGT_BUCKET_}/data/bq_data_replication/
+        else
+          echo "🔪No SQL files found under generated_sql folder or the folder does not exist. Skipping copy.🔪"
+        fi
+
 logsBucket: 'gs://$_GCS_BUCKET'
 timeout: 7200s
 substitutions:
