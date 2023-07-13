@@ -25,10 +25,11 @@ from generate_query import generate_runtime_view
 from generate_query import create_cdc_table
 from generate_query import generate_cdc_dag_files
 from generate_query import validate_table_configs
+from generate_query import client as generate_query_bq_client
 
 # File containing list and settings for cdc tables to be copied
 # The path is relative to "src" directory.
-_CONFIG_FILE = "../setting.yaml"
+_CONFIG_FILE = "../cdc_settings.yaml"
 
 # This script generates a bunch of DAG and SQL files.
 # We store them locally, before they get copied over to GCS buckets.
@@ -89,6 +90,7 @@ def main():
     if not sys.argv[1]:
         raise SystemExit("ERROR: No Source Project argument provided!")
     source_project = sys.argv[1]
+    generate_query_bq_client.project = source_project
 
     if not sys.argv[2]:
         raise SystemExit("ERROR: No Source Dataset argument provided!")

@@ -21,165 +21,24 @@ steps:
     args:
     - -c
     - |
-      # Processing configuration
-      source load_env_from_config.sh \
-        "${_PJID_SRC}" "${_PJID_TGT}" \
-        "${_DS_RAW}" "${_DS_CDC}" \
-        "${_MANDT}" "${_LOCATION}" \
-        "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-        "${_CURRENCY}" "${_LANGUAGE}" \
-        "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-        "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-        "${_RUN_EXT_SQL}"
+      echo "Configuration (${_CONFIG_FILE}):"
+      cat "${_CONFIG_FILE}"
+
+      _PJID_SRC_=$(jq -r ."projectIdSource" "${_CONFIG_FILE}")
+      _DEPLOY_CDC_=$(jq -r ."SAP.deployCDC" "${_CONFIG_FILE}")
+      _DS_RAW_=$(jq -r ."SAP.datasets.raw" "${_CONFIG_FILE}")
+      _DS_CDC_=$(jq -r ."SAP.datasets.cdc" "${_CONFIG_FILE}")
+      _TEST_DATA_=$(jq -r ."testData" "${_CONFIG_FILE}")
+      _SQL_FLAVOUR_=$(jq -r ."SAP.SQLFlavor" "${_CONFIG_FILE}")
 
       if [[ "$${_DEPLOY_CDC_}" == "true" ]] ; then
         echo "Running config_reader"
         cd ./src/ && python config_reader.py $$_PJID_SRC_ $$_DS_RAW_ $$_DS_CDC_ $$_TEST_DATA_ $$_SQL_FLAVOUR_
       fi
-  # Unfold hierarchies - dag_hierarchies_module.py will only be copied if datasets exist
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
-    id: hier_reader
-    entrypoint: /bin/bash
-    waitFor: ['-']
-    args:
-    - -c
-    - |
-      # Processing configuration
-      source load_env_from_config.sh \
-        "${_PJID_SRC}" "${_PJID_TGT}" \
-        "${_DS_RAW}" "${_DS_CDC}" \
-        "${_MANDT}" "${_LOCATION}" \
-        "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-        "${_CURRENCY}" "${_LANGUAGE}" \
-        "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-        "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-        "${_RUN_EXT_SQL}"
 
-      if [[ "$${_DEPLOY_CDC_}" == "true" ]]; then
-        echo "Running hier_reader"
-        cd ./src/ && python hier_reader.py $$_PJID_SRC_ $$_DS_RAW_ $$_DS_CDC_ $$_GCS_BUCKET_
-      fi
-  # If requested, generate external data DAGs (weather, trends, etc)
-  - name: 'gcr.io/kittycorn-public/deploy-kittycorn:v2.0'
-    id: generate_external_dags
-    waitFor: ['config_reader', 'hier_reader']
-    entrypoint: /bin/bash
-    args:
-      - "-c"
-      - |
-        # Processing configuration
-        source load_env_from_config.sh \
-          "${_PJID_SRC}" "${_PJID_TGT}" \
-          "${_DS_RAW}" "${_DS_CDC}" \
-          "${_MANDT}" "${_LOCATION}" \
-          "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-          "${_CURRENCY}" "${_LANGUAGE}" \
-          "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-          "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-          "${_RUN_EXT_SQL}"
-
-        if [[ "$${_GEN_EXT_}" == "true" ]] ; then
-          echo "Running generate_external_dags"
-          ./generate_external_dags.sh \
-            --source-project "$${_PJID_SRC_}" \
-            --cdc-processed-dataset "$${_DS_CDC_}" \
-            --location "$${_LOCATION_}" \
-            --test-data "$${_TEST_DATA_}" \
-            --run-ext-sql "$${_RUN_EXT_SQL_}" \
-            --sql-flavour "$${_SQL_FLAVOUR_}" \
-            --mandt "$${_MANDT_}"
-
-        fi
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: copy_dag_py_files_to_gcs
-    waitFor: ['generate_external_dags']
-    entrypoint: /bin/bash
-    args:
-      - -c
-      - |
-        # Processing configuration
-        source load_env_from_config.sh \
-          "${_PJID_SRC}" "${_PJID_TGT}" \
-          "${_DS_RAW}" "${_DS_CDC}" \
-          "${_MANDT}" "${_LOCATION}" \
-          "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-          "${_CURRENCY}" "${_LANGUAGE}" \
-          "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-          "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-          "${_RUN_EXT_SQL}"
-
-        if [[ "$${_GEN_EXT_}" == "true" ]] || [[ "$${_DEPLOY_CDC_}" == "true" ]]; then
-          echo "Running copy_dag_py_files_to_gcs"
-          generated_files=$(shopt -s nullglob dotglob; echo ./generated_dag/*.py)
-          if (( ${#generated_files} ))
-          then
-            gsutil -m cp -r './generated_dag/*.py' gs://$${_GCS_BUCKET_}/dags
-          else
-            echo "🔪🔪🔪No Python files found under generated_dag folder or the folder does not exist. Skipping copy.🔪🔪🔪"
-          fi
-        fi
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: copy_dag_sql_files_to_gcs
-    waitFor: ['generate_external_dags']
-    entrypoint: /bin/bash
-    args:
-      - -c
-      - |
-        # Processing configuration
-        source load_env_from_config.sh \
-          "${_PJID_SRC}" "${_PJID_TGT}" \
-          "${_DS_RAW}" "${_DS_CDC}" \
-          "${_MANDT}" "${_LOCATION}" \
-          "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-          "${_CURRENCY}" "${_LANGUAGE}" \
-          "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-          "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-          "${_RUN_EXT_SQL}"
-
-        if [[ "$${_GEN_EXT_}" == "true" ]] || [[ "$${_DEPLOY_CDC_}" == "true" ]]; then
-          echo "Running copy_dag_sql_files_to_gcs"
-          generated_files=$(shopt -s nullglob dotglob; echo ./generated_sql/*.sql)
-          if (( ${#generated_files} ))
-          then
-            gsutil -m cp -r './generated_sql/*.sql' gs://$${_GCS_BUCKET_}/data/bq_data_replication
-          else
-            echo "🔪🔪🔪No SQL files found under generated_sql folder or the folder does not exist. Skipping copy.🔪🔪🔪"
-          fi
-        fi
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: copy_dag_ini_files_to_gcs
-    waitFor: ['generate_external_dags']
-    entrypoint: /bin/bash
-    args:
-      - "-c"
-      - |
-        # Processing configuration
-        source load_env_from_config.sh \
-          "${_PJID_SRC}" "${_PJID_TGT}" \
-          "${_DS_RAW}" "${_DS_CDC}" \
-          "${_MANDT}" "${_LOCATION}" \
-          "${_SQL_FLAVOUR}" "${_TEST_DATA}" \
-          "${_CURRENCY}" "${_LANGUAGE}" \
-          "${_GCS_LOG_BUCKET}" "${_GCS_BUCKET}" \
-          "${_DEPLOY_CDC}" "${_GEN_EXT}" \
-          "${_RUN_EXT_SQL}"
-
-        if [[ "$${_GEN_EXT_}" == "true" ]]; then
-          echo "Running copy_dag_ini_files_to_gcs"
-          generated_files=$(shopt -s nullglob dotglob; echo ./generated_dag/*.ini)
-          if (( ${#generated_files} ))
-          then
-            gsutil -m cp -r './generated_dag/*.ini' gs://$${_GCS_BUCKET_}/data/api_input
-          else
-            echo "🔪🔪🔪No INI files found under generated_dag folder or the folder does not exist. Skipping copy.🔪🔪🔪"
-          fi
-
-        fi
-
-logsBucket: 'gs://$_GCS_LOG_BUCKET'
+logsBucket: 'gs://$_GCS_BUCKET'
 timeout: 7200s
+substitutions:
+  _CONFIG_FILE: "config/sap_config.json"
 options:
   substitution_option: "ALLOW_LOOSE"

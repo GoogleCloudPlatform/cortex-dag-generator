@@ -27,7 +27,6 @@ from google.cloud import storage
 _SQL_DAG_PYTHON_TEMPLATE = 'template_dag/dag_sql.py'
 _SQL_DAG_SQL_TEMPLATE = 'template_sql/cdc_sql_template.sql'
 _VIEW_SQL_TEMPLATE = 'template_sql/runtime_query_view.sql'
-_HIER_DAG_PYTHON_TEMPLATE = 'template_dag/dag_sql_hierarchies.py'
 
 _GENERATED_DAG_DIR = '../generated_dag'
 _GENERATED_SQL_DIR = '../generated_sql'
@@ -201,10 +200,6 @@ def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency,
               f'from {raw_table_name} table')
 
 
-def generate_hier_dag_files(file_name, **dag_subs):
-    generate_dag_py_file(_HIER_DAG_PYTHON_TEMPLATE, file_name, **dag_subs)
-
-
 def get_key_comparator(table_prefix, keys):
     p_key_list = []
     for key in keys:
@@ -310,11 +305,12 @@ def validate_table_config(table_config):
         e_msg = 'Missing `load_frequency` property.'
         return e_msg
 
-    if load_frequency not in _LOAD_FREQUENCIES:
-        e_msg = ('`load_frequency` has to be one of the following:'
-                 f'{_LOAD_FREQUENCIES}.\n'
-                 f'Specified `load_frequency` is "{load_frequency}".')
-        return e_msg
+    # TODO: Add cron validation
+    # if load_frequency not in _LOAD_FREQUENCIES:
+    #     e_msg = ('`load_frequency` has to be one of the following:'
+    #              f'{_LOAD_FREQUENCIES}.\n'
+    #              f'Specified `load_frequency` is "{load_frequency}".')
+    #     return e_msg
 
     partition_details = table_config.get('partition_details')
     cluster_details = table_config.get('cluster_details')
@@ -470,24 +466,6 @@ def create_cdc_table(raw_table_name, cdc_table_name, partition_details,
         print(f'Created table {cdc_table_name}.')
 
 
-def check_create_hiertable(full_table, field):
-    try:
-        client.get_table(full_table)
-    except NotFound:
-        schema = [
-            bigquery.SchemaField('mandt', 'STRING', mode='REQUIRED'),
-            bigquery.SchemaField('parent', 'STRING', mode='REQUIRED'),
-            bigquery.SchemaField('parent_org', 'STRING', mode='NULLABLE'),
-            bigquery.SchemaField('child', 'STRING', mode='NULLABLE'),
-            bigquery.SchemaField('child_org', 'STRING', mode='NULLABLE'),
-            bigquery.SchemaField(field, 'STRING', mode='NULLABLE')
-        ]
-
-        table = bigquery.Table(full_table, schema=schema)
-        table = client.create_table(table)
-        print(f'Created {full_table}')
-
-
 def get_keys(full_table_name):
     """Retrieves primary key columns for raw table from metadata table.
 
@@ -506,13 +484,3 @@ def get_keys(full_table_name):
     for row in query_job:
         fields.append(row['fieldname'])
     return fields
-
-
-def copy_to_storage(gcs_bucket, prefix, directory, filename):
-    try:
-        bucket = storage_client.get_bucket(gcs_bucket)
-    except Exception as e:  #pylint:disable=broad-except
-        print(f'Error when accessing GCS bucket: {gcs_bucket}')
-        print(f'Error : {str(e)}')
-    blob = bucket.blob(f'{prefix}/{filename}')
-    blob.upload_from_filename(f'{directory}/{filename}')
