@@ -19,15 +19,9 @@
             "cdc": "",
             "raw": "",
             "ml": "ML_MODELS",
-            "reporting": "REPORTING",
-            "cdcECC": "",
-            "rawECC": "",
-            "cdcS4": "",
-            "rawS4": ""
+            "reporting": "REPORTING"
         },
         "SQLFlavor": "ecc",
-        "mandt": "100",
-        "mandtECC": "100",
-        "mandtS4": "100"
+        "mandt": "100"
     }
 }

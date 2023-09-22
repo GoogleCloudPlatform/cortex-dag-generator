@@ -85,6 +85,6 @@ steps:
 logsBucket: 'gs://$_GCS_BUCKET'
 timeout: 7200s
 substitutions:
-  _CONFIG_FILE: "config/sap_config.json"
+  _CONFIG_FILE: "config/config.json"
 options:
   substitution_option: "ALLOW_LOOSE"
