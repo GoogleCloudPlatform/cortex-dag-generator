@@ -52,6 +52,6 @@ WHEN NOT MATCHED AND IFNULL(S.operation_flag, 'I') != 'D' THEN
   VALUES (${fields})
 WHEN MATCHED AND S.operation_flag = 'D' THEN
   DELETE
-WHEN MATCHED AND S.operation_flag = 'U' THEN
+WHEN MATCHED AND S.operation_flag IN ('I','U') THEN
   UPDATE SET ${update_fields};
 

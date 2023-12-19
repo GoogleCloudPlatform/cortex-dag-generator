@@ -16,6 +16,7 @@ data_to_replicate:
 {% if sql_flavour.upper() == 'S4' %}
   - base_table: acdoca
     load_frequency: "@hourly"
+    cluster_details: {columns: ["rclnt", "rbukrs"]}
   - base_table: finsc_ld_cmp
     load_frequency: "@daily"
   - base_table: finsc_ledger_rep
@@ -28,6 +29,12 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: ckmlcr
     load_frequency: "@daily"
+  - base_table: hrrp_node
+    load_frequency: "@monthly"
+  - base_table: hrrp_directory
+    load_frequency: "@monthly"
+  - base_table: hrrp_nodet
+    load_frequency: "@monthly"
 {% endif %}
 {% if sql_flavour.upper() == 'ECC' %}
   - base_table: anla
@@ -52,6 +59,12 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: msfd
     load_frequency: "@weekly"
+  - base_table: fagl_011pc
+    load_frequency: "@monthly"
+  - base_table: fagl_011qt
+    load_frequency: "@monthly"
+  - base_table: fagl_011zc
+    load_frequency: "@monthly"
 {% endif %}
   - base_table: adr6
     load_frequency: "@daily"
@@ -61,6 +74,10 @@ data_to_replicate:
     load_frequency: "@daily"
   - base_table: bkpf
     load_frequency: "@hourly"
+    partition_details: {
+      column: "budat", partition_type: "time", time_grain: "day"
+    }
+    cluster_details: {columns: ["bukrs", "gjahr"]}
   - base_table: afko
     load_frequency: "@hourly"
   - base_table: afpo
@@ -69,7 +86,7 @@ data_to_replicate:
     load_frequency: "@hourly"
   - base_table: bseg
     load_frequency: "@hourly"
-    cluster_details: {columns: ["mandt", "bukrs"]}
+    cluster_details: {columns: ["mandt", "bukrs", "gjahr"]}
   - base_table: but000
     load_frequency: "@daily"
   - base_table: but020
