@@ -35,6 +35,10 @@ data_to_replicate:
     load_frequency: "@monthly"
   - base_table: hrrp_nodet
     load_frequency: "@monthly"
+  - base_table: sethanahier0101
+    load_frequency: "@monthly"
+  - base_table: sethanahier0106
+    load_frequency: "@monthly"
 {% endif %}
 {% if sql_flavour.upper() == 'ECC' %}
   - base_table: anla
@@ -172,6 +176,8 @@ data_to_replicate:
   - base_table: setnode
     load_frequency: "@monthly"
   - base_table: setheadert
+    load_frequency: "@monthly"
+  - base_table: setheader
     load_frequency: "@monthly"
   - base_table: ska1
     load_frequency: "@daily"
