@@ -19,8 +19,9 @@ WITH
     FROM (
       SELECT *, ROW_NUMBER() OVER (PARTITION BY ${keys}, recordstamp ORDER BY recordstamp) AS row_num
       FROM `${base_table}`
+      QUALIFY row_num = 1
     )
-    WHERE row_num = 1
+    -- WHERE row_num = 1
   ),
   T1 AS (
     SELECT ${keys}, MAX(recordstamp) AS recordstamp
