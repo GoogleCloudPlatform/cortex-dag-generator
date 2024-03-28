@@ -39,6 +39,10 @@ data_to_replicate:
     load_frequency: "@monthly"
   - base_table: sethanahier0106
     load_frequency: "@monthly"
+  - base_table: finsc_ledger
+    load_frequency: "@yearly"
+  - base_table: finsc_ledger_t
+    load_frequency: "@yearly"
 {% endif %}
 {% if sql_flavour.upper() == 'ECC' %}
   - base_table: anla

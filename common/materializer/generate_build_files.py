@@ -192,7 +192,7 @@ def _create_build_files(global_settings: dict, bq_obj_settings: dict,
             "build_files_list": build_files_list
         })
 
-        build_file_num = f"{build_file_counter:02d}"
+        build_file_num = f"{build_file_counter:03d}"
         build_file_name = f"cloudbuild.materializer.{tgt_dataset_name}.{build_file_num}.yaml"  #pylint: disable=line-too-long
         build_file = Path(generated_files_dir, build_file_name)
 
