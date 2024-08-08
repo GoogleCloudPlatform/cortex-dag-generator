@@ -133,7 +133,7 @@ def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency, parti
         'month': today.month,
         'day': today.day,
         'query_file': dag_sql_file_name,
-        'load_frequency': load_frequency,
+        'load_frequency': load_frequency
     }
 
     # Create python DAG flie.
