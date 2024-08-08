@@ -17,6 +17,12 @@ data_to_replicate:
   - base_table: acdoca
     load_frequency: "@hourly"
     cluster_details: {columns: ["rclnt", "rbukrs"]}
+    #CORTEX-CUSTOMER below is an example to add partition flag. If set to Y, the partition enabled cdc merge template will be applied
+    #the pre requisite for this would be that the raw and cdc table needs to be partitioned by recordstamp field at a DAY level
+    partition_flg: "Y"   
+    partition_details: {
+        column: "recordstamp", partition_type: "time", time_grain: "day"
+    }
   - base_table: finsc_ld_cmp
     load_frequency: "@daily"
   - base_table: finsc_ledger_rep

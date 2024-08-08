@@ -26,6 +26,8 @@ from google.cloud import storage
 
 _SQL_DAG_PYTHON_TEMPLATE = 'template_dag/dag_sql.py'
 _SQL_DAG_SQL_TEMPLATE = 'template_sql/cdc_sql_template.sql'
+#path for the partition enabled cdc template is added below
+_SQL_DAG_PARTITION_SQL_TEMPLATE = 'template_sql/cdc_sql_partiton_template.sql'
 _VIEW_SQL_TEMPLATE = 'template_sql/runtime_query_view.sql'
 
 _GENERATED_DAG_DIR = '../generated_dag'
@@ -111,7 +113,7 @@ def generate_runtime_view(raw_table_name, cdc_table_name):
     print(f'Created view {cdc_table_name}')
 
 
-def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency,
+def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency, partition_flg,
                            gen_test):
     """Generates file contaiing DAG code to refresh CDC table from RAW table.
 
@@ -161,7 +163,14 @@ def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency,
     p_key = ' AND '.join(p_key_list)
     p_key_sub_query = ' AND '.join(p_key_list_for_sub_query)
 
-    with open(_SQL_DAG_SQL_TEMPLATE, mode='r',
+    #check the value of partition flag. If it is Y then use the optimized cdc template for paritioned tables else use the default template
+    if partition_flg == "Y":
+        template_sql_file = _SQL_DAG_PARTITION_SQL_TEMPLATE
+    else:
+        template_sql_file = _SQL_DAG_SQL_TEMPLATE
+
+
+    with open(template_sql_file, mode='r',
               encoding='utf-8') as sql_template_file:
         sql_template = Template(sql_template_file.read())
 
