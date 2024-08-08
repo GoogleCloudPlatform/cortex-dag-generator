@@ -17,6 +17,10 @@ data_to_replicate:
   - base_table: acdoca
     load_frequency: "@hourly"
     cluster_details: {columns: ["rclnt", "rbukrs"]}
+    partition_flg: "Y"
+    partition_details: {
+        column: "recordstamp", partition_type: "time", time_grain: "day"
+    }
   - base_table: finsc_ld_cmp
     load_frequency: "@daily"
   - base_table: finsc_ledger_rep
