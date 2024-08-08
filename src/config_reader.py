@@ -57,7 +57,7 @@ def process_table(table_config: dict, source_dataset: str, target_dataset: str,
         partition_details = table_config.get("partition_details")
         cluster_details = table_config.get("cluster_details")
 
-        # Check for partition_flg if not exist use "N"
+        # Check for partition_flg. if it does not exist, then default the value to "N"
         if "partition_flg" in table_config:
             partition_flg = table_config.get("partition_flg")
         else:

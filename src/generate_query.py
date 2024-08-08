@@ -26,6 +26,7 @@ from google.cloud import storage
 
 _SQL_DAG_PYTHON_TEMPLATE = 'template_dag/dag_sql.py'
 _SQL_DAG_SQL_TEMPLATE = 'template_sql/cdc_sql_template.sql'
+#path for the partition enabled cdc template is added below
 _SQL_DAG_PARTITION_SQL_TEMPLATE = 'template_sql/cdc_sql_partiton_template.sql'
 _VIEW_SQL_TEMPLATE = 'template_sql/runtime_query_view.sql'
 
@@ -162,6 +163,7 @@ def generate_cdc_dag_files(raw_table_name, cdc_table_name, load_frequency, parti
     p_key = ' AND '.join(p_key_list)
     p_key_sub_query = ' AND '.join(p_key_list_for_sub_query)
 
+    #check the value of partition flag. If it is Y then use the optimized cdc template for paritioned tables else use the default template
     if partition_flg == "Y":
         template_sql_file = _SQL_DAG_PARTITION_SQL_TEMPLATE
     else:

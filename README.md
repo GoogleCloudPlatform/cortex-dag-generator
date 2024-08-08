@@ -41,3 +41,13 @@ by configuring a Cloud Builds trigger that runs automatically upon push to a Clo
 
 `targetBucket` - is a GCS bucket created for holding the DAG python scripts and SQL scripts
 (`targetBucket` in `config/config.json`).
+
+# Performance Optimization for Partitioned Table 
+The following steps must be followed to generate the optimized CDC script for raw and cdc tables partitioned by recordstamp. 
+Recommendation is to use this script for tables that are huge in size / that have low latency requirements.
+The optimized script can be found at this path /src/template_sql/cdc_sql_partition_template.sql
+Please follow the below steps to enable 
+- make sure that the table for which you want to use this script is partitioned by recordstamp at a DAY level in RAW dataset
+- add the option partition_flg: "Y"  
+- add partition settings to enable DAY partition on recordstamp field. 
+- Refer to the example given in the cdc_settings.yaml file for the table acdoca

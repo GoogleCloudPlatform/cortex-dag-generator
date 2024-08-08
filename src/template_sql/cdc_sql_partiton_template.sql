@@ -8,7 +8,8 @@
   --  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   --  See the License for the specific language governing permissions and
   --  limitations under the License.
-  -- Declare 2 variables to prune raw and cdc tables
+
+  -- this sql optimized template will work well for partitioned tables
 
 DECLARE max_rstamp TIMESTAMP;
 
