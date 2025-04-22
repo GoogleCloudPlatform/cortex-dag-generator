@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2025 Google LLC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,46 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable-all
+# Disable pylance warnings
+# type: ignore
+# Disable all pylint warning
+# pylint: skip-file
 
 from __future__ import print_function
 
 import ast
-from datetime import timedelta, datetime
+from datetime import datetime
+from datetime import timedelta
+
 import airflow
-from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.providers.google.cloud.operators.bigquery import \
+    BigQueryInsertJobOperator
 
 # BigQuery Job Labels - converts generated string to dict
 # If string is empty, assigns empty dict
 _BQ_LABELS = ast.literal_eval("${runtime_labels_dict}" or "{}")
+_BQ_LOCATION = "${bq_location}"
+_GCP_CONN_ID = "${module_name}_${tgt_dataset_type}_bq"
 
 default_dag_args = {
-    "depends_on_past": False,
-    "start_date": datetime(${year}, ${month}, ${day}),
-    "catchup": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=30),
+   "depends_on_past": False,
+   "start_date": datetime(${year}, ${month}, ${day}),
+   "catchup": False,
+   "retries": 1,
+   "retry_delay": timedelta(minutes=30),
 }
 
-with airflow.DAG(dag_id="CDC_BigQuery_${base_table}",
-                 template_searchpath=["/home/airflow/gcs/data/bq_data_replication/"],
+with airflow.DAG("${dag_full_name}",
                  default_args=default_dag_args,
                  catchup=False,
                  max_active_runs=1,
-                 schedule_interval="${load_frequency}") as dag:
+                 schedule_interval="${load_frequency}",
+                 tags=${tags}) as dag:
+
     start_task = EmptyOperator(task_id="start")
-    copy_records = BigQueryInsertJobOperator(
-        task_id="merge_query_records",
-        gcp_conn_id="sap_cdc_bq",
-        configuration={
-            "query": {
-                "query": "${query_file}",
-                "useLegacySql": False
-            },
-            "labels": _BQ_LABELS,
-            "location": "${bq_location}"
-        }
-    )
+
     stop_task = EmptyOperator(task_id="stop")
-    start_task >> copy_records >> stop_task # type: ignore
